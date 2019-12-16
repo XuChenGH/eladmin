@@ -1,0 +1,34 @@
+import request from '@/utils/request'
+const  BASE_SERVICE = 'api/${changeClassName}';
+
+export function add(data) {
+  return request({
+    url: BASE_SERVICE,
+    method: 'post',
+    data
+  })
+}
+
+export function del(${pkChangeColName}) {
+  return request({
+    url: BASE_SERVICE + '/' + ${pkChangeColName},
+    method: 'delete'
+  })
+}
+
+export function edit(data) {
+  return request({
+    url: BASE_SERVICE,
+    method: 'put',
+    data
+  })
+}
+
+export function download${className}(data) {
+  return request({
+    url: BASE_SERVICE+'/download',
+    method: 'post',
+    data:data,
+    responseType: 'blob'
+  })
+}

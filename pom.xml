@@ -4,21 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.zhengjie</groupId>
-    <artifactId>eladmin</artifactId>
+    <groupId>com.hundsun.pdpm</groupId>
+    <artifactId>pdpm</artifactId>
     <packaging>pom</packaging>
     <version>2.3</version>
 
     <modules>
-        <module>eladmin-common</module>
-        <module>eladmin-logging</module>
-        <module>eladmin-system</module>
-        <module>eladmin-tools</module>
-        <module>eladmin-generator</module>
+        <module>common</module>
+        <module>logging</module>
+        <module>system</module>
+        <module>tools</module>
+        <module>generator</module>
     </modules>
 
-    <name>EL-ADMIN后台管理系统</name>
-    <url>http://auauz.net</url>
+    <name>恒生研发过程管理系统</name>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
