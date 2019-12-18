@@ -47,12 +47,12 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         if(verificationCode == null){
             code.setCode(RandomUtil.randomNumbers (6));
             content = template.render(Dict.create().set("code",code.getCode()));
-            emailVo = new EmailVo(Collections.singletonList(code.getValue()),"eladmin后台管理系统",content);
+            emailVo = new EmailVo(Collections.singletonList(code.getValue()),"恒生研发过程管理系统",content);
             timedDestruction(verificationCodeRepository.save(code));
         // 存在就再次发送原来的验证码
         } else {
             content = template.render(Dict.create().set("code",verificationCode.getCode()));
-            emailVo = new EmailVo(Collections.singletonList(verificationCode.getValue()),"eladmin后台管理系统",content);
+            emailVo = new EmailVo(Collections.singletonList(verificationCode.getValue()),"恒生研发过程管理系统",content);
         }
         return emailVo;
     }

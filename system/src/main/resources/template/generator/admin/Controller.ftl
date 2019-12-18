@@ -55,24 +55,24 @@ public class ${className}Controller {
     }
 
     @GetMapping
-    @Log("查询${className}")
-    @ApiOperation("查询${className}")
+    @Log("查询${tableRealName}")
+    @ApiOperation("查询${tableRealName}")
     @PreAuthorize("@el.check('${changeClassName}:list')")
     public ResponseEntity get${className}s(${className}QueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(${changeClassName}Service.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
     @PostMapping
-    @Log("新增${className}")
-    @ApiOperation("新增${className}")
+    @Log("新增${tableRealName}")
+    @ApiOperation("新增${tableRealName}")
     @PreAuthorize("@el.check('${changeClassName}:add')")
     public ResponseEntity create(@Validated @RequestBody ${className} resources){
         return new ResponseEntity<>(${changeClassName}Service.create(resources),HttpStatus.CREATED);
     }
 
     @PutMapping
-    @Log("修改${className}")
-    @ApiOperation("修改${className}")
+    @Log("修改${tableRealName}")
+    @ApiOperation("修改${tableRealName}")
     @PreAuthorize("@el.check('${changeClassName}:edit')")
     public ResponseEntity update(@Validated @RequestBody ${className} resources){
         ${changeClassName}Service.update(resources);
@@ -80,8 +80,8 @@ public class ${className}Controller {
     }
 
     @DeleteMapping(value = "/{${pkChangeColName}}")
-    @Log("删除${className}")
-    @ApiOperation("删除${className}")
+    @Log("删除${tableRealName}")
+    @ApiOperation("删除${tableRealName}")
     @PreAuthorize("@el.check('${changeClassName}:del')")
     public ResponseEntity delete(@PathVariable ${pkColumnType} ${pkChangeColName}){
         ${changeClassName}Service.delete(${pkChangeColName});

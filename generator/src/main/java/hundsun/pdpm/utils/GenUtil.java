@@ -66,20 +66,21 @@ public class GenUtil {
      * @param columnInfos 表元数据
      * @param genConfig 生成代码的参数配置，如包路径，作者
      */
-    public static void generatorCode(List<ColumnInfo> columnInfos, GenConfig genConfig, String tableName) throws IOException {
+    public static void generatorCode(List<ColumnInfo> columnInfos, GenConfig genConfig,String tableCode, String tableName) throws IOException {
         Map<String,Object> map = new HashMap<>();
         map.put("package",genConfig.getPack());
         map.put("moduleName",genConfig.getModuleName());
         map.put("author",genConfig.getAuthor());
         map.put("date", LocalDate.now().toString());
-        map.put("tableName",tableName);
-        String className = StringUtils.toCapitalizeCamelCase(tableName);
-        String changeClassName = StringUtils.toCamelCase(tableName);
+        map.put("tableName",tableCode);
+        map.put("tableRealName",tableName);
+        String className = StringUtils.toCapitalizeCamelCase(tableCode);
+        String changeClassName = StringUtils.toCamelCase(tableCode);
 
         // 判断是否去除表前缀
         if (StringUtils.isNotEmpty(genConfig.getPrefix())) {
-            className = StringUtils.toCapitalizeCamelCase(StrUtil.removePrefix(tableName,genConfig.getPrefix()));
-            changeClassName = StringUtils.toCamelCase(StrUtil.removePrefix(tableName,genConfig.getPrefix()));
+            className = StringUtils.toCapitalizeCamelCase(StrUtil.removePrefix(tableCode,genConfig.getPrefix()));
+            changeClassName = StringUtils.toCamelCase(StrUtil.removePrefix(tableCode,genConfig.getPrefix()));
         }
         map.put("className", className);
         map.put("upperCaseClassName", className.toUpperCase());

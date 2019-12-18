@@ -51,11 +51,11 @@ public class GeneratorController {
 
     @ApiOperation("生成代码")
     @PostMapping
-    public ResponseEntity generator(@RequestBody List<ColumnInfo> columnInfos, @RequestParam String tableName){
+    public ResponseEntity generator(@RequestBody List<ColumnInfo> columnInfos,@RequestParam String tableCode, @RequestParam String tableName){
         if(!generatorEnabled){
             throw new BadRequestException("此环境不允许生成代码！");
         }
-        generatorService.generator(columnInfos,genConfigService.find(),tableName);
+        generatorService.generator(columnInfos,genConfigService.find(),tableCode,tableName);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

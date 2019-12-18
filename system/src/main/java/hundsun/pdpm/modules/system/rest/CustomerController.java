@@ -62,24 +62,24 @@ public class CustomerController {
     }
 
     @GetMapping
-    @Log("查询Customer")
-    @ApiOperation("查询Customer")
+    @Log("查询客户信息")
+    @ApiOperation("查询客户信息")
     @PreAuthorize("@el.check('customer:list')")
     public ResponseEntity getCustomers(CustomerQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(customerService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
     @PostMapping
-    @Log("新增Customer")
-    @ApiOperation("新增Customer")
+    @Log("新增客户信息")
+    @ApiOperation("新增客户信息")
     @PreAuthorize("@el.check('customer:add')")
     public ResponseEntity create(@Validated @RequestBody Customer resources){
         return new ResponseEntity<>(customerService.create(resources),HttpStatus.CREATED);
     }
 
     @PutMapping
-    @Log("修改Customer")
-    @ApiOperation("修改Customer")
+    @Log("修改客户信息")
+    @ApiOperation("修改客户信息")
     @PreAuthorize("@el.check('customer:edit')")
     public ResponseEntity update(@Validated @RequestBody Customer resources){
         customerService.update(resources);
@@ -87,8 +87,8 @@ public class CustomerController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @Log("删除Customer")
-    @ApiOperation("删除Customer")
+    @Log("删除客户信息")
+    @ApiOperation("删除客户信息")
     @PreAuthorize("@el.check('customer:del')")
     public ResponseEntity delete(@PathVariable String id){
         customerService.delete(id);

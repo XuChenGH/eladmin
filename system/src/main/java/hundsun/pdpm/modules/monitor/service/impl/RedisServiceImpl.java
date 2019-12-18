@@ -74,7 +74,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public void deleteByKey(String key) {
-        List<RedisVo> redisVoList = findByKey(key.toLowerCase());
+        List<RedisVo> redisVoList = findByKey(key);
         for (RedisVo redisVo:redisVoList){
             delete(redisVo.getKey());
         }

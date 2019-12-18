@@ -67,12 +67,12 @@ public class GeneratorServiceImpl implements GeneratorService {
     }
 
     @Override
-    public void generator(List<ColumnInfo> columnInfos, GenConfig genConfig, String tableName) {
+    public void generator(List<ColumnInfo> columnInfos, GenConfig genConfig,String tableCode, String tableName) {
         if(genConfig.getId() == null){
             throw new BadRequestException("请先配置生成器");
         }
         try {
-            GenUtil.generatorCode(columnInfos,genConfig,tableName);
+            GenUtil.generatorCode(columnInfos,genConfig,tableCode,tableName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
