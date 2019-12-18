@@ -11,9 +11,13 @@ import hundsun.pdpm.service.EmailService;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.mail.internet.MimeMessage;
 import java.util.Optional;
 
 /**
@@ -35,6 +39,7 @@ public class EmailServiceImpl implements EmailService {
     @CachePut(key = "'1'")
     @Transactional(rollbackFor = Exception.class)
     public EmailConfig update(EmailConfig emailConfig, EmailConfig old) {
+        emailConfig.setId(4432423L);
         try {
             if(!emailConfig.getPass().equals(old.getPass())){
                 // 对称加密
@@ -60,31 +65,26 @@ public class EmailServiceImpl implements EmailService {
             throw new BadRequestException("请先配置，再操作");
         }
         // 封装
-        MailAccount account = new MailAccount();
-        account.setHost(emailConfig.getHost());
-        account.setPort(Integer.parseInt(emailConfig.getPort()));
-        account.setAuth(true);
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        javaMailSender.setHost(emailConfig.getHost());
+        javaMailSender.setPort(Integer.parseInt(emailConfig.getPort()));
         try {
             // 对称解密
-            account.setPass(EncryptUtils.desDecrypt(emailConfig.getPass()));
+            javaMailSender.setPassword(EncryptUtils.desDecrypt(emailConfig.getPass()));
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-        account.setFrom(emailConfig.getUser()+"<"+emailConfig.getFromUser()+">");
-        // ssl方式发送
-        account.setSslEnable(true);
+        javaMailSender.setUsername(emailConfig.getFromUser());
         String content = emailVo.getContent();
         // 发送
         try {
+            MimeMessage msg = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true,"UTF-8");
+            helper.setFrom (emailConfig.getFromUser());
             int size = emailVo.getTos().size();
-            Mail.create(account)
-                    .setTos(emailVo.getTos().toArray(new String[size]))
-                    .setTitle(emailVo.getSubject())
-                    .setContent(content)
-                    .setHtml(true)
-                    //关闭session
-                    .setUseGlobalSession(false)
-                    .send();
+            helper.setTo(emailVo.getTos().toArray(new String[size]));
+            helper.setText(content,true);
+            javaMailSender.send(msg);
         }catch (Exception e){
             throw new BadRequestException(e.getMessage());
         }

@@ -74,7 +74,11 @@
     <!--导入表单-->
     <uploadForm ref="upform" :uploadApi="uploadApi"/>
     <!--表格渲染-->
-    <el-table v-loading="loading" :data="data" size="small" style="width: 100%;" @selection-change="handleSelectionChange" @row-dblclick="rowDoubleClick">
+    <el-table v-loading="loading" :data="data" size="small" style="width: 100%;"
+              @selection-change="handleSelectionChange"
+              @row-dblclick="rowDoubleClick"
+              @contextmenu.prevent.native="$refs.rightMenu.openMenu($event,checkPermission(['admin','${changeClassName}:add']))"
+              @row-contextmenu="rowContextMenu">
       <el-table-column
               type="selection"
               width="55">
@@ -127,6 +131,7 @@
       layout="total, prev, pager, next, sizes"
       @size-change="sizeChange"
       @current-change="pageChange"/>
+    <right-menu ref="rightMenu" @copyClick="copyClick"/>
   </div>
 </template>
 
@@ -136,9 +141,10 @@ import initData from '@/mixins/initData'
 import { del, download${className} } from '@/api/${changeClassName}'
 import uploadForm from  '@/views/business/upload/form'
 import { parseTime, downloadFile, deepClone } from '@/utils/index'
+import rightMenu from '@/views/business/rightmenu/index'
 import eForm from './form'
 export default {
-  components: { eForm, uploadForm },
+  components: { eForm, uploadForm, rightMenu },
   mixins: [initData],
   <#if isHasDict>
   dicts:[${dictJoint}],
@@ -234,7 +240,7 @@ export default {
       }
       this.downloadLoading = true
       download${className}(data).then(result => {
-        downloadFile(result, '${className}列表', 'xlsx')
+        downloadFile(result, '${tableRealName}列表', 'xlsx')
       this.downloadLoading = false
     }).catch(() => {
         this.downloadLoading = false
@@ -245,6 +251,15 @@ export default {
     },
     resetQuery(){
       this.$refs['queryForm'].resetFields();
+    },
+    rowContextMenu(row){
+      this.rightClickRow = row;
+    },
+    copyClick(){
+      const  _this = this.$refs.form;
+      _this.form = deepClone(this.rightClickRow);
+      this.operate = '新增'
+      _this.dialog = true
     }
   }
 }

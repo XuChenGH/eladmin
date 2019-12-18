@@ -13,7 +13,7 @@ import java.io.Serializable;
 * @date 2019-11-29
 */
 @Data
-@PermissionObject(tablecode = "Customer",tablename = "客户信息表")
+@PermissionObject(tablecode = "customer",tablename = "客户信息表")
 public class CustomerDTO implements Serializable {
 
     // ID

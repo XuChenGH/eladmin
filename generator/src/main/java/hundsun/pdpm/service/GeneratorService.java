@@ -31,5 +31,5 @@ public interface GeneratorService {
      * @param genConfig 代码生成配置
      * @param tableName 表名
      */
-    void generator(List<ColumnInfo> columnInfos, GenConfig genConfig, String tableName);
+    void generator(List<ColumnInfo> columnInfos, GenConfig genConfig, String tableCode, String tableName);
 }

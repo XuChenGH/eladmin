@@ -10,6 +10,7 @@ import EntityExistException;
         </#if>
     </#list>
 </#if>
+import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
 import hundsun.pdpm.modules.system.service.DictDetailService;
 import org.springframework.util.CollectionUtils;
 import hundsun.pdpm.utils.ValidationUtil;
@@ -72,14 +73,20 @@ public class ${className}ServiceImpl implements ${className}Service {
     @Override
     @Cacheable
     public Map<String,Object> queryAll(${className}QueryCriteria criteria, Pageable pageable){
-        Page<${className}> page = ${changeClassName}Repository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        Page<${className}> page = ${changeClassName}Repository.findAll((root, criteriaQuery, criteriaBuilder) ->
+                                   PermissionUtils.getPredicate(root,
+                                       QueryHelp.getPredicate(root,criteria,criteriaBuilder),
+                                       criteriaBuilder,${className}DTO.class),pageable);
         return PageUtil.toPage(page.map(${changeClassName}Mapper::toDto));
     }
 
     @Override
     @Cacheable
     public List<${className}DTO> queryAll(${className}QueryCriteria criteria){
-        return ${changeClassName}Mapper.toDto(${changeClassName}Repository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        return ${changeClassName}Mapper.toDto(${changeClassName}Repository.findAll((root, criteriaQuery, criteriaBuilder) ->
+                                                PermissionUtils.getPredicate(root,
+                                                QueryHelp.getPredicate(root,criteria,criteriaBuilder),
+                                                criteriaBuilder,${className}DTO.class)));
     }
 
     @Override
