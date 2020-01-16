@@ -50,4 +50,9 @@ public @interface Excel {
      * 转换名
      * */
     String tranfer() default "";
+
+    /*
+    * 列宽
+    * */
+    int colwidth() default 0;
 }

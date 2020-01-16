@@ -1,5 +1,6 @@
 package hundsun.pdpm.modules.system.service.impl;
 
+import hundsun.pdpm.modules.system.domain.FunctionInfo;
 import hundsun.pdpm.modules.system.domain.ScriptInfo;
 import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
 import hundsun.pdpm.modules.system.service.DictDetailService;
@@ -39,7 +40,6 @@ import hundsun.pdpm.utils.*;
 * @date 2019-12-18
 */
 @Service
-@CacheConfig(cacheNames = "scriptInfo")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ScriptInfoServiceImpl implements ScriptInfoService {
 
@@ -56,50 +56,45 @@ public class ScriptInfoServiceImpl implements ScriptInfoService {
     }
 
     @Override
-    @Cacheable
-    public Map<String,Object> queryAll(ScriptInfoQueryCriteria criteria, Pageable pageable){
+    public Map<String,Object> queryAll(ScriptInfoQueryCriteria criteria, Pageable pageable,boolean haveFunc){
         Page<ScriptInfo> page = scriptInfoRepository.findAll((root, criteriaQuery, criteriaBuilder) ->
                                    PermissionUtils.getPredicate(root,
                                        QueryHelp.getPredicate(root,criteria,criteriaBuilder),
                                        criteriaBuilder,ScriptInfoDTO.class),pageable);
-        return PageUtil.toPage(page.map(scriptInfoMapper::toDto));
+        return PageUtil.toPage(page.map((scriptInfo)->scriptInfoMapper.toDto(scriptInfo,haveFunc)));
     }
 
     @Override
-    @Cacheable
     public List<ScriptInfoDTO> queryAll(ScriptInfoQueryCriteria criteria){
         return scriptInfoMapper.toDto(scriptInfoRepository.findAll((root, criteriaQuery, criteriaBuilder) ->
                                                 PermissionUtils.getPredicate(root,
                                                 QueryHelp.getPredicate(root,criteria,criteriaBuilder),
-                                                criteriaBuilder,ScriptInfoDTO.class)));
+                                                criteriaBuilder,ScriptInfoDTO.class)),true);
     }
 
     @Override
-    @Cacheable(key = "#p0")
     public ScriptInfoDTO findById(String id) {
         ScriptInfo scriptInfo = scriptInfoRepository.findById(id).orElseGet(ScriptInfo::new);
         ValidationUtil.isNull(scriptInfo.getId(),"ScriptInfo","id",id);
-        return scriptInfoMapper.toDto(scriptInfo);
+        return scriptInfoMapper.toDto(scriptInfo,true);
     }
     @Override
-    @Cacheable
     public List<ScriptInfoDTO> findByIdlist(List<ScriptInfoDTO> scriptInfoList) {
         if (CollectionUtils.isEmpty(scriptInfoList)){
         return  new ArrayList<>();
         }
         List<String> idlist = scriptInfoList.stream().map(ScriptInfoDTO::getId).collect(Collectors.toList());
-        return scriptInfoMapper.toDto(scriptInfoRepository.findAllByIdIn(idlist));
+        return scriptInfoMapper.toDto(scriptInfoRepository.findAllByIdIn(idlist),true);
     }
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ScriptInfoDTO create(ScriptInfo resources) {
         resources.setId(StringUtils.get32UUID());
-        return scriptInfoMapper.toDto(scriptInfoRepository.save(resources));
+        ScriptInfo scriptInfo = scriptInfoRepository.save(resources);
+        return scriptInfoMapper.toDto(scriptInfo,true);
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ScriptInfo resources) {
         ScriptInfo scriptInfo = scriptInfoRepository.findById(resources.getId()).orElseGet(ScriptInfo::new);
@@ -109,7 +104,6 @@ public class ScriptInfoServiceImpl implements ScriptInfoService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
         scriptInfoRepository.deleteById(id);
@@ -119,10 +113,9 @@ public class ScriptInfoServiceImpl implements ScriptInfoService {
     @Override
     public void download(List<ScriptInfoDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(ScriptInfoDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,ScriptInfoDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,ScriptInfoDTO.class,false);
     }
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public List<ScriptInfoDTO> upload(MultipartFile multipartFiles) throws Exception {
        Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(ScriptInfoDTO.class);

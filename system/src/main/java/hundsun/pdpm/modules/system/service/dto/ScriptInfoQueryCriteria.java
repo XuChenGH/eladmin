@@ -14,9 +14,9 @@ public class ScriptInfoQueryCriteria{
     @Query
     private String id;
 
-    // 精确
     @Query
-    private String functionId;
+    private String productId;
+
 
     // 精确
     @Query
@@ -37,4 +37,7 @@ public class ScriptInfoQueryCriteria{
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String memo;
+
+    @Query
+    private String moduleType;
 }

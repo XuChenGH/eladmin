@@ -21,7 +21,7 @@ public interface ScriptInfoService {
     * @param pageable 分页参数
     * @return Map<String,Object>
     */
-    Map<String,Object> queryAll(ScriptInfoQueryCriteria criteria, Pageable pageable);
+    Map<String,Object> queryAll(ScriptInfoQueryCriteria criteria, Pageable pageable,boolean haveFunc);
 
     /**
     * 查询所有数据不分页

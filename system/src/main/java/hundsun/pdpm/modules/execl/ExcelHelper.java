@@ -2,35 +2,50 @@ package hundsun.pdpm.modules.execl;
 
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.poi.excel.ExcelUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import hundsun.pdpm.annotation.Excel;
 import hundsun.pdpm.modules.system.domain.DictDetail;
+import hundsun.pdpm.modules.system.service.dto.BusinessInfoDTO;
+import hundsun.pdpm.modules.system.service.dto.ExportDict;
 import hundsun.pdpm.utils.StringUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
-import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.util.CollectionUtils;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
+import org.apache.poi.hssf.usermodel.HSSFComment;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFPatriarch;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by 78782 on 2018/6/30.
@@ -153,17 +168,31 @@ public class ExcelHelper {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             workbook.write(os);
-            byte[] bytes = os.toByteArray();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        try {
+            byte[] content = os.toByteArray();
+            InputStream is = new ByteArrayInputStream(content);
             response.setHeader("Content-Type", contentType);
-            response.setContentLength(os.size());
+            response.setContentLength(content.length);
             response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename + extension, "utf-8"));
             Cookie cookie = new Cookie("fileDownload", "true");
             cookie.setPath("/");
             response.addCookie(cookie);
-            ServletOutputStream outputstream = response.getOutputStream();
-            os.writeTo(outputstream);
-            os.close();
-            outputstream.flush();
+            ServletOutputStream outputStream = response.getOutputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            BufferedOutputStream bos = new BufferedOutputStream(outputStream);
+            byte[] buff = new byte[8192];
+            int bytesRead;
+            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+                bos.write(buff, 0, bytesRead);
+
+            }
+            bis.close();
+            bos.close();
+            outputStream.flush();
+            outputStream.close();
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -234,13 +263,15 @@ public class ExcelHelper {
             }
         }
     }
-    private void writeRows (Sheet sheet, List list, Class clazz, ExcelWriteListener listener) throws IllegalAccessException {
-        int len = list.size();
+    private void writeRows (Sheet sheet,  JSONArray  jsonArray, Class clazz, ExcelWriteListener listener) throws IllegalAccessException {
+        int len = jsonArray.size();
         CellStyle cellStyle = getCellStyle(false, true);
         CellStyle cellLinkStyle = getCellStyle(false, true, true);
+        Map<String,Excel> execlMap = new HashMap<>();
+        Field[] fields = clazz.getDeclaredFields();
+        Map<String,Integer> autoSizeMap = new HashMap<>();
         for (int i=0;i<len;i++) {
             Row row = sheet.createRow(i+1);
-            Field[] fields = clazz.getDeclaredFields();
             int cellIndex = 0;
             if (this.showIndex) {
                 // 第一列设置序号
@@ -250,12 +281,19 @@ public class ExcelHelper {
                 cellOrder.setCellValue(i + 1);
                 cellIndex++;
             }
+            JSONObject jo = (JSONObject) JSONObject.toJSON(jsonArray.get(i));
             for (Field field : fields) {
-                Excel excel = field.getAnnotation(Excel.class);
+                String fieldName = field.getName();
+                Excel excel;
+                if(execlMap.containsKey(fieldName)){
+                    excel =execlMap.get(fieldName);
+                }else {
+                    excel = field.getAnnotation(Excel.class);
+                    execlMap.put(fieldName,excel);
+                }
                 if (excel!=null && excel.export()) {
-                    field.setAccessible(true);
                     Cell cell = row.createCell(cellIndex);
-                    String value = field.get(list.get(i)) == null ? "" : field.get(list.get(i)).toString();
+                    String value =  StringUtils.nvl(jo.getString(fieldName),"");
                     String result = listener.onWriteRow(cell, excel, value, sheet, i, cellIndex);
                     // 先交由外部处理，处理完毕后如果得到结果则填值，否则采用默认处理方式。
                     if (result != null) {
@@ -287,17 +325,34 @@ public class ExcelHelper {
                         }
                     }
                     if (excel.autosize()) {
-                        sheet.autoSizeColumn(cellIndex, true);
+                        autoSizeMap.put(fieldName,Math.max(autoSizeMap.get(fieldName)==null?0:autoSizeMap.get(fieldName), value.getBytes().length));
+                        if(i == len-1){
+                            int colWidth = autoSizeMap.get(fieldName)*256;
+                            if(colWidth < 255*256){
+                               if(colWidth < 3000){
+                                   colWidth = 3000;
+                               }
+                            }else {
+                                colWidth = 6000;
+                            }
+                            sheet.setColumnWidth(cellIndex,colWidth);
+                        }
+                    }
+                    if(i == len-1){
+                        if(excel.colwidth()>0){
+                            sheet.setColumnWidth(cellIndex,excel.colwidth());
+                        }
                     }
                     cellIndex++;
                 }
+
             }
         }
     }
-    public <T> void writeExcel(String sheetname, List<T> list, Class clazz, ExcelWriteListener listener) throws IllegalAccessException {
+    public <T> void writeExcel(String sheetname,  JSONArray  jsonArray, Class clazz, ExcelWriteListener listener) throws IllegalAccessException {
         Sheet sheet = workbook.createSheet(sheetname);
         writeTitles(sheet, clazz, listener);
-        writeRows(sheet, list, clazz, listener);
+        writeRows(sheet, jsonArray, clazz, listener);
     }
     public void close() {
         try {
@@ -325,11 +380,41 @@ public class ExcelHelper {
         return  value;
     }
 
-    public static <T> void exportExcel (List<T> list,Map<String,List<DictDetail>> dictMap, Class clazz,boolean showIndex) {
+    private static ExportDict getExportDict(Map<String,List<DictDetail>> dictMap){
+        ExportDict exportDict = new ExportDict();
+        Map<String, Map<String,String>> dict = new HashMap<>();
+        Map<String,String[]> dictArray = new HashMap<>();
+        exportDict.setDictMap(dict);
+        exportDict.setValues(dictArray);
+        for(Map.Entry<String,List<DictDetail>> entry:dictMap.entrySet()){
+            Map<String,String> dictValue = new HashMap<>();
+            dict.put(entry.getKey(),dictValue);
+            String[] values = new String[entry.getValue().size()];
+            dictArray.put(entry.getKey(),values);
+            List<DictDetail> details = entry.getValue();
+            for (int i = 0; i< details.size();i++){
+                dictValue.put(details.get(i).getValue(),details.get(i).getLabel());
+                values[i] = details.get(i).getLabel();
+            }
+
+        }
+        return  exportDict;
+    }
+
+    public static <T> void exportExcel (HttpServletResponse response,List<T> list,Map<String,List<DictDetail>> dictMap, Class clazz,boolean showIndex) {
         ExcelHelper excelHelper = new ExcelHelper(IdUtil.fastSimpleUUID(), showIndex);
+        JSONArray jsonArray = JSON.parseArray(JSON.toJSONString(list));
+        ExportDict exportDict = getExportDict(dictMap);
+        Map<String, Map<String,String>> dicts = exportDict.getDictMap();
+        Map<String,String[]> dictLabels = exportDict.getValues();
+        // 设置单元格样式
+        CellStyle cellStyle = excelHelper.getCellStyle(false, true);
+        cellStyle.setFillForegroundColor(IndexedColors.YELLOW.index);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        int listLength = list.size();
         try {
             // 写入到excel
-            excelHelper.writeExcel("Sheet1", list, clazz, new ExcelHelper.ExcelWriteListener() {
+            excelHelper.writeExcel("Sheet1", jsonArray, clazz, new ExcelHelper.ExcelWriteListener() {
                 @Override
                 public String onWriteRow(Cell cell, Excel excel, String value, Sheet sheet, int rowIndex, int cellIndex) {
                     // 设置单元格样式
@@ -364,9 +449,6 @@ public class ExcelHelper {
                     return null;
                 }
             });
-
-            HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes()).getResponse();
             excelHelper.exportExcel(response);
         } catch ( IllegalAccessException | IOException e) {
             e.printStackTrace();
@@ -417,4 +499,5 @@ public class ExcelHelper {
         });
         return result;
     }
+
 }

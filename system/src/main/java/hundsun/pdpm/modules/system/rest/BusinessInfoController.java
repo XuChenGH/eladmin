@@ -1,8 +1,13 @@
 package hundsun.pdpm.modules.system.rest;
 
+import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.fastjson.JSON;
 import hundsun.pdpm.aop.log.Log;
+
+import java.util.ArrayList;
 import java.util.List;
 import hundsun.pdpm.modules.system.domain.BusinessInfo;
+import hundsun.pdpm.modules.system.domain.BusinessInfoDL;
 import hundsun.pdpm.modules.system.service.BusinessInfoService;
 import hundsun.pdpm.modules.system.service.dto.BusinessInfoDTO;
 import hundsun.pdpm.modules.system.service.dto.BusinessInfoQueryCriteria;
@@ -14,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,22 +38,24 @@ public class BusinessInfoController {
         this.businessInfoService = businessInfoService;
     }
 
-    @Log("导出数据")
-    @ApiOperation("导出数据")
+    @Log("导出TA商机信息数据")
+    @ApiOperation("导出TA商机信息数据")
     @PostMapping(value = "/download")
     @PreAuthorize("@el.check('businessInfo:export')")
-    public void download(HttpServletResponse response,@RequestBody List<BusinessInfoDTO> data) throws IOException {
+    public void download(HttpServletResponse response, @RequestBody BusinessInfoDL dl) throws IOException {
         List<BusinessInfoDTO> businessInfoDTOList;
+        BusinessInfoQueryCriteria criteria = dl.getCriteria();
+        List<BusinessInfoDTO> data   = dl.getData();
         if(CollectionUtils.isEmpty(data)){
-           businessInfoDTOList = businessInfoService.queryAll(new BusinessInfoQueryCriteria());
+           businessInfoDTOList = businessInfoService.queryAll(criteria);
         }else{
            businessInfoDTOList = businessInfoService.findByIdlist(data);
         }
         businessInfoService.download(businessInfoDTOList, response);
     }
 
-    @Log("导入数据")
-    @ApiOperation("导入数据")
+    @Log("导入TA商机信息数据")
+    @ApiOperation("导入TA商机信息数据")
     @PostMapping(value = "/upload")
     @PreAuthorize("@el.check('businessInfo:import')")
     public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file)throws Exception{
@@ -79,11 +87,11 @@ public class BusinessInfoController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(value = "/{id}")
+    @PostMapping(value = "/delete")
     @Log("删除TA商机信息")
     @ApiOperation("删除TA商机信息")
     @PreAuthorize("@el.check('businessInfo:del')")
-    public ResponseEntity delete(@PathVariable String id){
+    public ResponseEntity delete(@RequestBody List<String> id){
         businessInfoService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
     }

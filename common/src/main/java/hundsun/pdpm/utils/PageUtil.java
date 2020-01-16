@@ -1,5 +1,6 @@
 package hundsun.pdpm.utils;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.Page;
 import java.util.*;
 
@@ -35,7 +36,12 @@ public class PageUtil extends cn.hutool.core.util.PageUtil {
         map.put("totalElements",page.getTotalElements());
         return map;
     }
-
+    public static Map<String,Object> toPage(List<Object> content,long total) {
+        Map<String,Object> map = new LinkedHashMap<>(2);
+        map.put("content",content);
+        map.put("totalElements",total);
+        return map;
+    }
     /**
      * 自定义分页
      */

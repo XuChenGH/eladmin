@@ -155,7 +155,7 @@ public class DataPermissionFieldServiceImpl implements DataPermissionFieldServic
     @Override
     public void download(List<DataPermissionFieldDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(DataPermissionFieldDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,DataPermissionFieldDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,DataPermissionFieldDTO.class,false);
     }
     @Override
     @CacheEvict(allEntries = true)

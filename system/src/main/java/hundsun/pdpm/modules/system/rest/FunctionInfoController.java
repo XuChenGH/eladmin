@@ -32,10 +32,10 @@ public class FunctionInfoController {
         this.functionInfoService = functionInfoService;
     }
 
-    @Log("导出数据")
-    @ApiOperation("导出数据")
+    @Log("导出功能数据")
+    @ApiOperation("导出功能数据")
     @PostMapping(value = "/download")
-    @PreAuthorize("@el.check('functionInfo:export')")
+    @PreAuthorize("@el.check('functionInfo:export','scriptInfo:export')")
     public void download(HttpServletResponse response,@RequestBody List<FunctionInfoDTO> data) throws IOException {
         List<FunctionInfoDTO> functionInfoDTOList;
         if(CollectionUtils.isEmpty(data)){
@@ -46,18 +46,33 @@ public class FunctionInfoController {
         functionInfoService.download(functionInfoDTOList, response);
     }
 
-    @Log("导入数据")
-    @ApiOperation("导入数据")
+    @Log("导入功能数据")
+    @ApiOperation("导入功能数据")
     @PostMapping(value = "/upload")
-    @PreAuthorize("@el.check('functionInfo:import')")
+    @PreAuthorize("@el.check('functionInfo:import','scriptInfo:import')")
     public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file)throws Exception{
        return new ResponseEntity<>(functionInfoService.upload(file),HttpStatus.CREATED);
+    }
+
+    @GetMapping(value = "/all")
+    @Log("查询所有功能信息")
+    @ApiOperation("查询所有功能信息")
+    @PreAuthorize("@el.check('functionInfo:list','scriptInfo:list')")
+    public ResponseEntity getAllFunctionInfos(){
+        return new ResponseEntity<>(functionInfoService.queryAll(),HttpStatus.OK);
+    }
+    @PostMapping(value = "/scriptName")
+    @Log("查询功能信息")
+    @ApiOperation("查询功能信息")
+    @PreAuthorize("@el.check('functionInfo:list','scriptInfo:list')")
+    public ResponseEntity getFunctionInfosByScriptName(@RequestBody  List<String> data){
+        return new ResponseEntity<>(functionInfoService.findByScriptNameList(data),HttpStatus.OK);
     }
 
     @GetMapping
     @Log("查询功能信息")
     @ApiOperation("查询功能信息")
-    @PreAuthorize("@el.check('functionInfo:list')")
+    @PreAuthorize("@el.check('functionInfo:list','scriptInfo:list')")
     public ResponseEntity getFunctionInfos(FunctionInfoQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(functionInfoService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -65,7 +80,7 @@ public class FunctionInfoController {
     @PostMapping
     @Log("新增功能信息")
     @ApiOperation("新增功能信息")
-    @PreAuthorize("@el.check('functionInfo:add')")
+    @PreAuthorize("@el.check('functionInfo:add','scriptInfo:add')")
     public ResponseEntity create(@Validated @RequestBody FunctionInfo resources){
         return new ResponseEntity<>(functionInfoService.create(resources),HttpStatus.CREATED);
     }
@@ -73,7 +88,7 @@ public class FunctionInfoController {
     @PutMapping
     @Log("修改功能信息")
     @ApiOperation("修改功能信息")
-    @PreAuthorize("@el.check('functionInfo:edit')")
+    @PreAuthorize("@el.check('functionInfo:edit','scriptInfo:edit')")
     public ResponseEntity update(@Validated @RequestBody FunctionInfo resources){
         functionInfoService.update(resources);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -82,7 +97,7 @@ public class FunctionInfoController {
     @DeleteMapping(value = "/{id}")
     @Log("删除功能信息")
     @ApiOperation("删除功能信息")
-    @PreAuthorize("@el.check('functionInfo:del')")
+    @PreAuthorize("@el.check('functionInfo:del','scriptInfo:del')")
     public ResponseEntity delete(@PathVariable String id){
         functionInfoService.delete(id);
         return new ResponseEntity(HttpStatus.OK);

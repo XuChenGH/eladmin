@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class CustomerDTO implements Serializable {
 
     // ID
-    @Excel(title = "标识符")
+    @Excel(title = "标识符",colwidth = 1)
     private String id;
 
     // 客户类型

@@ -117,11 +117,17 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
         businessInfoRepository.deleteById(id);
     }
 
+    @Override
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(List<String> id) {
+        businessInfoRepository.deleteAllByIdIn(id);
+    }
 
     @Override
     public void download(List<BusinessInfoDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(BusinessInfoDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,BusinessInfoDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,BusinessInfoDTO.class,false);
     }
     @Override
     @CacheEvict(allEntries = true)

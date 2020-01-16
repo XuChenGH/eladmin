@@ -68,7 +68,7 @@ public class DictDetailServiceImpl implements DictDetailService {
                 String dictName =excel.dictname();
                 if(!StringUtils.isEmpty(dictName)){
                     Dict dict = dictRepository.findByName(dictName);
-                    map.put(dictName,dictDetailRepository.findByDictId(dict.getId()));
+                    map.put(dictName,dict.getDictDetails());
                 }
             }
         }

@@ -5,8 +5,8 @@ spring:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
       url: jdbc:log4jdbc:mysql://10.20.30.43:3306/pdpm?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false
-      username: pdpm
-      password: pdpm
+      username: root
+      password: root
 
       # 初始化配置
       initial-size: 3

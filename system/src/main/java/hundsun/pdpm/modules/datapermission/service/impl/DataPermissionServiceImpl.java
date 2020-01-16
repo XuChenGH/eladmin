@@ -164,7 +164,7 @@ public class DataPermissionServiceImpl implements DataPermissionService {
     @Override
     public void download(List<DataPermissionDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(DataPermissionDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,DataPermissionDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,DataPermissionDTO.class,false);
     }
     @Override
     @CacheEvict(allEntries = true)

@@ -30,6 +30,9 @@ public interface FunctionInfoService {
     */
     List<FunctionInfoDTO> queryAll(FunctionInfoQueryCriteria criteria);
 
+
+    Map<String,FunctionInfoDTO> queryAll();
+
     /**
      * 根据ID查询
      * @param id ID
@@ -38,6 +41,8 @@ public interface FunctionInfoService {
     FunctionInfoDTO findById(String id);
 
     List<FunctionInfoDTO> findByIdlist(List<FunctionInfoDTO> functionInfoList);
+
+    List<FunctionInfoDTO> findByScriptNameList(List<String> data);
 
     FunctionInfoDTO create(FunctionInfo resources);
 

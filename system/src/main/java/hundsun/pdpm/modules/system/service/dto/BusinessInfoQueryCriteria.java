@@ -1,6 +1,8 @@
 package hundsun.pdpm.modules.system.service.dto;
 
 import lombok.Data;
+
+import java.io.Serializable;
 import java.sql.Timestamp;
 import hundsun.pdpm.annotation.Query;
 
@@ -9,7 +11,7 @@ import hundsun.pdpm.annotation.Query;
 * @date 2019-12-09
 */
 @Data
-public class BusinessInfoQueryCriteria{
+public class BusinessInfoQueryCriteria implements Serializable {
 
     // 精确
     @Query
@@ -84,7 +86,7 @@ public class BusinessInfoQueryCriteria{
     private String estimatedTime;
 
     // 精确
-    @Query
+    @Query(type = Query.Type.GREATER_THAN,nvl = "2099-99-99")
     private String contractFillDate;
 
     // 模糊
