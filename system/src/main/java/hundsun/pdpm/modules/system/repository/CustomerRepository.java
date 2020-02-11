@@ -17,4 +17,6 @@ public interface CustomerRepository extends JpaRepository<Customer, String>, Jpa
 
     void  deleteAllByIdIn(List<String> idlist);
 
+    List<Customer> findAllByCustTypeEqualsAndAreaEqualsAndCustNameEquals(String sCustType, String sArea, String sCustName);
+
 }

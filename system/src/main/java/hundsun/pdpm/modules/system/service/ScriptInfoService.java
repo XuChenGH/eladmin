@@ -37,6 +37,8 @@ public interface ScriptInfoService {
      */
     ScriptInfoDTO findById(String id);
 
+    List<ScriptInfoDTO> findScirptByName(List<String> scripts);
+
     List<ScriptInfoDTO> findByIdlist(List<ScriptInfoDTO> scriptInfoList);
 
     ScriptInfoDTO create(ScriptInfo resources);

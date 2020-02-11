@@ -78,6 +78,12 @@ public class ScriptInfoServiceImpl implements ScriptInfoService {
         ValidationUtil.isNull(scriptInfo.getId(),"ScriptInfo","id",id);
         return scriptInfoMapper.toDto(scriptInfo,true);
     }
+
+    @Override
+    public List<ScriptInfoDTO> findScirptByName(List<String> scripts) {
+        return scriptInfoMapper.toDto(scriptInfoRepository.findAllByScriptNameIn(scripts),true);
+    }
+
     @Override
     public List<ScriptInfoDTO> findByIdlist(List<ScriptInfoDTO> scriptInfoList) {
         if (CollectionUtils.isEmpty(scriptInfoList)){

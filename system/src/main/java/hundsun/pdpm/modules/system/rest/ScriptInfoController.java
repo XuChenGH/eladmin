@@ -68,6 +68,15 @@ public class ScriptInfoController {
     public ResponseEntity getScriptInfosNoFunction(ScriptInfoQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(scriptInfoService.queryAll(criteria,pageable,false),HttpStatus.OK);
     }
+
+    @PostMapping(value = "/havefunc")
+    @Log("查询脚本信息")
+    @ApiOperation("查询脚本信息")
+    @PreAuthorize("@el.check('scriptInfo:list')")
+    public ResponseEntity getScriptInfosHaveFunction(@RequestBody  List<String> data){
+        return new ResponseEntity<>(scriptInfoService.findScirptByName(data),HttpStatus.OK);
+    }
+
     @PostMapping
     @Log("新增脚本信息")
     @ApiOperation("新增脚本信息")
