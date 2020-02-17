@@ -49,5 +49,5 @@ public interface BusinessInfoService {
 
     void download(List<BusinessInfoDTO> all, HttpServletResponse response) throws IOException;
 
-    List<BusinessInfoDTO> upload(MultipartFile multipartFiles) throws Exception;
+    void upload(MultipartFile multipartFiles,String id) throws Exception;
 }

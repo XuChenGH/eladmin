@@ -22,12 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author Zheng Jie
@@ -62,14 +60,20 @@ public class DictDetailServiceImpl implements DictDetailService {
     public Map<String, List<DictDetail>> queryAll(Class clazz) {
         Field[] fields = clazz.getDeclaredFields();
         Map<String, List<DictDetail>> map = new HashMap<>();
+        List<String> dictNameList = new ArrayList<>();
         for(Field field:fields){
             Excel excel = field.getAnnotation(Excel.class);
             if(excel!=null){
-                String dictName =excel.dictname();
-                if(!StringUtils.isEmpty(dictName)){
-                    Dict dict = dictRepository.findByName(dictName);
-                    map.put(dictName,dict.getDictDetails());
+                List<String> dictName =Arrays.asList(excel.dictname().split(","));
+                if(!CollectionUtils.isEmpty(dictName)){
+                    dictNameList.addAll(dictName);
                 }
+            }
+        }
+        if(!CollectionUtils.isEmpty(dictNameList)){
+            List<Dict> dictList = dictRepository.findAllByNameIn(dictNameList);
+            for(Dict dict : dictList){
+                map.put(dict.getName(),dict.getDictDetails());
             }
         }
         return map;

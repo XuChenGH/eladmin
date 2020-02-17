@@ -55,4 +55,30 @@ public @interface Excel {
     * 列宽
     * */
     int colwidth() default 0;
+
+    boolean sheet() default false;
+
+    boolean plain() default false;
+
+    /*排序 多sheet使用,按sheet下标 以逗号分隔 0 不需要*/
+    String  order() default "";
+
+    Align   align() default Align.ALIGN_CENTER;
+
+    enum Align {
+        /**
+         * 左对齐
+         * */
+        ALIGN_LEFT,
+
+        /**
+         * 中间对齐
+         * */
+        ALIGN_CENTER,
+
+        /**
+         * 右对齐
+         * */
+        ALIGN_RIGHT
+    }
 }

@@ -2,10 +2,13 @@ package hundsun.pdpm.modules.system.rest;
 
 import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSON;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import hundsun.pdpm.aop.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import hundsun.pdpm.modules.execl.ExeclUtils;
 import hundsun.pdpm.modules.system.domain.BusinessInfo;
 import hundsun.pdpm.modules.system.domain.BusinessInfoDL;
 import hundsun.pdpm.modules.system.service.BusinessInfoService;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.*;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,8 +62,24 @@ public class BusinessInfoController {
     @ApiOperation("导入TA商机信息数据")
     @PostMapping(value = "/upload")
     @PreAuthorize("@el.check('businessInfo:import')")
-    public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file)throws Exception{
-       return new ResponseEntity<>(businessInfoService.upload(file),HttpStatus.CREATED);
+    public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file,@RequestParam("id")String id)throws Exception{
+        if(CollectionUtils.isEmpty(ExeclUtils.getExeclMap(id))){
+            ExeclUtils.updateExeclStatus(ExeclUtils.START_IMP,id);
+            ExeclUtils.saveFile(id,file);
+            ExecutorService executor = Executors.newFixedThreadPool(1);
+            CompletableFuture.runAsync(() ->{
+                try {
+                    businessInfoService.upload(file,id);
+                    ExeclUtils.updateExeclStatus(ExeclUtils.FINISH_IMP,id);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    ExeclUtils.updateExeclStatus(ExeclUtils.EXECPTION_IMP,id);
+                }
+
+            },executor);
+        }
+        Thread.sleep(1000);
+        return new ResponseEntity<>(ExeclUtils.getExeclMap(id),HttpStatus.CREATED);
     }
 
     @GetMapping

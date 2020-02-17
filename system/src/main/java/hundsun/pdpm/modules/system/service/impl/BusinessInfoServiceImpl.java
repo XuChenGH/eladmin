@@ -1,8 +1,11 @@
 package hundsun.pdpm.modules.system.service.impl;
 
 import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
+import hundsun.pdpm.modules.execl.ExeclUtils;
 import hundsun.pdpm.modules.system.domain.BusinessInfo;
+import hundsun.pdpm.modules.system.domain.Delivery;
 import hundsun.pdpm.modules.system.service.DictDetailService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
 import hundsun.pdpm.utils.ValidationUtil;
 import hundsun.pdpm.utils.FileUtil;
@@ -132,7 +135,7 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public List<BusinessInfoDTO> upload(MultipartFile multipartFiles) throws Exception {
+    public void upload(MultipartFile multipartFiles,String id) throws Exception {
        Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(BusinessInfoDTO.class);
        List<BusinessInfoDTO> data = ExcelHelper.importExcel(multipartFiles,BusinessInfoDTO.class,dictMap,false);
        if(!CollectionUtils.isEmpty(data)){
@@ -147,9 +150,15 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
              }
              savelist.add(businessInfoMapper.toEntity(businessInfoDTO));
           }
-       businessInfoRepository.deleteAllByIdIn(idlist);
-       businessInfoRepository.saveAll(savelist);
+          businessInfoRepository.deleteAllByIdIn(idlist);
+           int count = savelist.size();
+           int num = 0;
+           ExeclUtils.updateExeclStatus(ExeclUtils.INSERT_IMP,id);
+           for(BusinessInfo businessInfo: savelist){
+               businessInfoRepository.save(businessInfo);
+               num++;
+               ExeclUtils.updateExeclInserNum(count,num,id);
+           }
        }
-        return  data;
      }
 }

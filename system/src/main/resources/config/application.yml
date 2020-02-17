@@ -1,6 +1,6 @@
 server:
   port: 8000
-  connection-timeout: 300000
+  connection-timeout: 3000000
 spring:
   freemarker:
     check-template-location: false

@@ -18,4 +18,6 @@ public class BusinessInfoDL implements Serializable {
     BusinessInfoQueryCriteria criteria;
 
     List<BusinessInfoDTO> data;
+
+    String id;
 }
