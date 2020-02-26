@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version:
  */
 
-public class ExeclUtils {
+public class ExcelUtils {
 
     public  static ConcurrentHashMap<String, Map<String,Object>> execlMap = new ConcurrentHashMap<>();
 

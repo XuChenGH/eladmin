@@ -1,14 +1,11 @@
 package hundsun.pdpm.modules.system.service.impl;
 
 import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
-import hundsun.pdpm.modules.execl.ExeclUtils;
+import hundsun.pdpm.modules.execl.ExcelUtils;
 import hundsun.pdpm.modules.system.domain.BusinessInfo;
-import hundsun.pdpm.modules.system.domain.Delivery;
 import hundsun.pdpm.modules.system.service.DictDetailService;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.CollectionUtils;
 import hundsun.pdpm.utils.ValidationUtil;
-import hundsun.pdpm.utils.FileUtil;
 import hundsun.pdpm.modules.system.repository.BusinessInfoRepository;
 import hundsun.pdpm.modules.system.service.BusinessInfoService;
 import hundsun.pdpm.modules.system.service.dto.BusinessInfoDTO;
@@ -17,7 +14,6 @@ import hundsun.pdpm.modules.system.service.mapper.BusinessInfoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import cn.hutool.core.util.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,7 +30,6 @@ import java.util.Map;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 import hundsun.pdpm.utils.*;
 /**
@@ -109,8 +104,7 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
     public void update(BusinessInfo resources) {
         BusinessInfo businessInfo = businessInfoRepository.findById(resources.getId()).orElseGet(BusinessInfo::new);
         ValidationUtil.isNull( businessInfo.getId(),"BusinessInfo","id",resources.getId());
-        businessInfo.copy(resources);
-        businessInfoRepository.save(businessInfo);
+        businessInfoRepository.save(resources);
     }
 
     @Override
@@ -153,11 +147,11 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
           businessInfoRepository.deleteAllByIdIn(idlist);
            int count = savelist.size();
            int num = 0;
-           ExeclUtils.updateExeclStatus(ExeclUtils.INSERT_IMP,id);
+           ExcelUtils.updateExeclStatus(ExcelUtils.INSERT_IMP,id);
            for(BusinessInfo businessInfo: savelist){
                businessInfoRepository.save(businessInfo);
                num++;
-               ExeclUtils.updateExeclInserNum(count,num,id);
+               ExcelUtils.updateExeclInserNum(count,num,id);
            }
        }
      }

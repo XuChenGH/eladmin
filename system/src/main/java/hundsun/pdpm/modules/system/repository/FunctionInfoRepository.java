@@ -14,4 +14,6 @@ List<FunctionInfo> findAllByIdIn(List<String> idlist);
 void  deleteAllByIdIn(List<String> idlist);
 
 List<FunctionInfo> findAllByFunctionNameEquals(String sfunctionName);
+
+List<FunctionInfo> findAllByFunctionNameEqualsAndFunctionModeEqualsAndProductIdEquals(String sfunctionName,String sFunctionMode,String sProductId);
 }

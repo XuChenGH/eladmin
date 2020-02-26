@@ -16,5 +16,6 @@ void  deleteAllByIdIn(List<String> idlist);
 
 
 List<ScriptInfo> findAllByScriptNameEquals(String sScriptName);
+List<ScriptInfo> findAllByScriptNameEqualsAndProductIdEquals(String sScriptName,String sProductId);
 List<ScriptInfo> findAllByScriptNameIn(List<String> sScriptName);
 }

@@ -2,40 +2,24 @@ package hundsun.pdpm.modules.execl;
 
 
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.http.ContentType;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import hundsun.pdpm.annotation.Excel;
 import hundsun.pdpm.modules.system.domain.DictDetail;
-import hundsun.pdpm.modules.system.service.dto.BusinessInfoDTO;
-import hundsun.pdpm.modules.system.service.dto.ExportDict;
 import hundsun.pdpm.utils.StringUtils;
-import io.swagger.models.auth.In;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.streaming.SXSSFCell;
-import org.apache.poi.xssf.streaming.SXSSFRow;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.util.CollectionUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
-import org.apache.poi.hssf.usermodel.HSSFComment;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFPatriarch;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -46,7 +30,6 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -92,13 +75,26 @@ public class ExcelHelper {
             throw new Exception("不支持的文件类型");
         }
     }
+
+    public ExcelHelper(String filePath, boolean showIndex) throws Exception {
+        this.showIndex = showIndex;
+        FileInputStream fileInputStream =   new FileInputStream(filePath);
+        if (filePath.endsWith(TYPE_XLS)) {
+            this.workbook =new HSSFWorkbook(fileInputStream);
+        } else if (filePath.endsWith(TYPE_XLSX)){
+            this.workbook = new XSSFWorkbook(fileInputStream);
+        } else {
+            throw new Exception("不支持的文件类型");
+        }
+    }
+
     public ExcelHelper(String id, boolean showIndex,boolean impOrExp) {
        this(id);
        this.showIndex = showIndex;
        if(impOrExp){
-           Map<String,Object> file = ExeclUtils.fileMap.get(id);
-           InputStream inputStream = (InputStream)file.get(ExeclUtils.INPUT_STREAM);
-           String originalFilename = (String)file.get(ExeclUtils.ORIGINAL_FILENAME);
+           Map<String,Object> file = ExcelUtils.fileMap.get(id);
+           InputStream inputStream = (InputStream)file.get(ExcelUtils.INPUT_STREAM);
+           String originalFilename = (String)file.get(ExcelUtils.ORIGINAL_FILENAME);
            try {
                if (originalFilename.endsWith(TYPE_XLS)) {
                    this.workbook = new HSSFWorkbook(inputStream);
@@ -108,10 +104,14 @@ public class ExcelHelper {
                    throw new Exception("不支持的文件类型");
                }
            }catch (Exception e){
-               ExeclUtils.updateExeclStatus(ExeclUtils.EXECPTION_IMP,id);
+               ExcelUtils.updateExeclStatus(ExcelUtils.EXECPTION_IMP,id);
            }
        }
     }
+
+
+
+
     private List<Field> getImportField(List<Field> fields,boolean multiSheet,int index,int sheetIndex,Sheet sheet,Class clazz, ExcelImportListener listener)throws Exception{
         List<Field> fieldList = new ArrayList<>();
         Map<String,Field> fieldMap = new HashMap<>();
@@ -123,9 +123,7 @@ public class ExcelHelper {
         }
         String value = listener.onImportRow(sheet,sheetIndex,null,0,index);
         while (value!=null){
-            if(fieldMap.containsKey(value)){
-                fieldList.add(fieldMap.get(value));
-            }
+            fieldList.add(fieldMap.getOrDefault(value,null));
             index++;
             value = listener.onImportRow(sheet,sheetIndex,null,0,index);
         }
@@ -225,6 +223,7 @@ public class ExcelHelper {
                 //获得第i行对象
                 int index = showIndex;
                 Object object = clazz.newInstance();
+                boolean columnIsNotNull = false;
                 //如果空行则跳过
                 if(isRowEmpty(sheet.getRow(i))){
                     continue;
@@ -239,6 +238,10 @@ public class ExcelHelper {
                     }
                 }
                 for (Field field : fieldList) {
+                    if(field == null){
+                        index++;
+                        continue;
+                    }
                     field.setAccessible(true);
                     Excel excel = field.getAnnotation(Excel.class);
                     if (excel != null) {
@@ -251,6 +254,7 @@ public class ExcelHelper {
                         }
                         String value = listener.onImportRow(sheet, sheetIndex, excel, i, index);
                         if (value!=null) {
+                            columnIsNotNull = true;
                             if(!StringUtils.isEmpty(excel.tranfer())){
                                 if("eightDate".equals(excel.tranfer())){
                                     value = StringUtils.eightDate(value);
@@ -287,7 +291,9 @@ public class ExcelHelper {
                         index++;
                     }
                 }
-                list.add(object);
+                if(columnIsNotNull){
+                    list.add(object);
+                }
             }
         }
     }
@@ -651,7 +657,7 @@ public class ExcelHelper {
     public static <T>  List<T> importExcel (String id, Class clazz, Map<String,List<DictDetail>>  dictMap, boolean showIndex) throws Exception {
         List<T> result = new ArrayList<>();
 
-        if (!ExeclUtils.fileMap.containsKey(id)) {
+        if (!ExcelUtils.fileMap.containsKey(id)) {
             throw new Exception("未找到上传数据");
         }
         ExcelHelper excelHelper = new ExcelHelper(id, showIndex,true);
@@ -678,6 +684,17 @@ public class ExcelHelper {
         return result;
     }
 
+    public static <T>  List<T> importExcel (Class clazz, String filePath,  Map<String,List<DictDetail>>  dictMap, boolean showIndex) throws Exception {
+        List<T> result = new ArrayList<>();
+
+        if (StringUtils.isEmpty(filePath)) {
+            throw new Exception("未找到上传数据");
+        }
+        ExcelHelper excelHelper = new ExcelHelper(filePath, showIndex);
+        importFromExcel(excelHelper,result,clazz,dictMap);
+        return result;
+    }
+
     public static <T>  List<T> importExcel (MultipartFile file, Class clazz, Map<String,List<DictDetail>>  dictMap, boolean showIndex) throws Exception {
         List<T> result = new ArrayList<>();
 
@@ -685,6 +702,11 @@ public class ExcelHelper {
             throw new Exception("未找到上传数据");
         }
         ExcelHelper excelHelper = new ExcelHelper(file, showIndex);
+        importFromExcel(excelHelper,result,clazz,dictMap);
+        return result;
+    }
+
+    private static <T>  void importFromExcel(ExcelHelper excelHelper, List<T> result , Class clazz, Map<String,List<DictDetail>>  dictMap) throws Exception {
         excelHelper.importFromExcel(dictMap,result, clazz, (sheet,sheetIndex, excel, rowIndex, cellIndex) -> {
             Row row = sheet.getRow(rowIndex);
             String value;
@@ -705,7 +727,6 @@ public class ExcelHelper {
             }
             return getCellValue(excel,value,sheetIndex,dictMap);
         });
-        return result;
     }
 
     private static String getCellValue(Excel excel,String value,int sheetIndex, Map<String,List<DictDetail>>  dictMap){
