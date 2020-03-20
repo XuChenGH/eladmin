@@ -3,8 +3,17 @@ package hundsun.pdpm.modules.datapermission.service.impl;
 import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import hundsun.pdpm.modules.datapermission.domain.DataPermissionField;
 import hundsun.pdpm.modules.datapermission.repository.DataPermissionRepository;
+import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionDTO;
+import hundsun.pdpm.modules.datapermission.service.mapper.DataPermissionMapper;
+import hundsun.pdpm.modules.system.domain.Role;
+import hundsun.pdpm.modules.system.domain.User;
 import hundsun.pdpm.modules.system.service.DictDetailService;
+import hundsun.pdpm.modules.system.service.dto.RoleDTO;
 import hundsun.pdpm.modules.system.service.dto.RoleSmallDTO;
+import hundsun.pdpm.modules.system.service.dto.UserDTO;
+import hundsun.pdpm.modules.system.service.mapper.RoleMapper;
+import hundsun.pdpm.modules.system.service.mapper.RoleSmallMapper;
+import hundsun.pdpm.modules.system.service.mapper.UserMapper;
 import org.springframework.util.CollectionUtils;
 import hundsun.pdpm.utils.ValidationUtil;
 import hundsun.pdpm.utils.FileUtil;
@@ -28,12 +37,10 @@ import hundsun.pdpm.modules.system.domain.DictDetail;
 import org.springframework.web.multipart.MultipartFile;
 import hundsun.pdpm.utils.PageUtil;
 import hundsun.pdpm.utils.QueryHelp;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 import hundsun.pdpm.utils.*;
 /**
@@ -54,6 +61,15 @@ public class DataPermissionFieldServiceImpl implements DataPermissionFieldServic
 
     @Autowired
     private DictDetailService dictDetailService;
+
+    @Autowired
+    private DataPermissionMapper dataPermissionMapper;
+
+    @Autowired
+    private RoleSmallMapper roleSmallMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     public DataPermissionFieldServiceImpl(DataPermissionFieldRepository dataPermissionFieldRepository, DataPermissionFieldMapper dataPermissionFieldMapper) {
         this.dataPermissionFieldRepository = dataPermissionFieldRepository;
@@ -106,16 +122,27 @@ public class DataPermissionFieldServiceImpl implements DataPermissionFieldServic
 
 
     @Override
-    public List<DataPermissionFieldDTO> findByRoleId(List<RoleSmallDTO> roleId,String tablecode) {
-        List<DataPermissionFieldDTO> fieldDTOList = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(roleId)){
-            List<Long> idList = roleId.stream().map(RoleSmallDTO::getId).collect(Collectors.toList());
-            List<DataPermission> dataPermissionList = dataPermissionRepository.findAllByRoleIdInAndTableCode(idList,tablecode);
-           // List<String> tableIdlist = dataPermissionList.stream().map(DataPermission::getId).collect(Collectors.toList());
-            List<DataPermissionField> dataPermissionFieldList = dataPermissionFieldRepository.findAllByTableIn(dataPermissionList);
-            fieldDTOList = dataPermissionFieldMapper.toDto(dataPermissionFieldList);
-        }
-        return fieldDTOList;
+    @Cacheable
+    public List<DataPermissionFieldDTO> findByUserRoleAndTableCode(List<RoleSmallDTO> roles, List<UserDTO> user,String tableCode) {
+      List<Role> roleList = roleSmallMapper.toEntity(roles);
+      List<User> userList = userMapper.toEntity(user);
+      List<DataPermissionFieldDTO> fieldDTOList = new ArrayList<>();
+      List<DataPermissionDTO> dataPermissions = dataPermissionMapper.toDto(dataPermissionRepository.findAllByUsersInOrRolesIn(userList,roleList));
+      if(!CollectionUtils.isEmpty(dataPermissions)){
+          //去重
+          HashSet<DataPermissionDTO>  hashSet = new HashSet<DataPermissionDTO>(dataPermissions);
+          for (DataPermissionDTO dto : hashSet){
+              List<DataPermissionFieldDTO> fieldDTOS = dto.getFields();
+              if(!CollectionUtils.isEmpty(fieldDTOS)){
+                for(DataPermissionFieldDTO fieldDTO :fieldDTOS){
+                    if(StringUtils.equals(fieldDTO.getTableCode(),tableCode)){
+                        fieldDTOList.add(fieldDTO);
+                    }
+                }
+              }
+          }
+      }
+      return  fieldDTOList;
     }
 
     @Override

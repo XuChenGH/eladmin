@@ -67,7 +67,7 @@ public class JwtTokenUtil implements Serializable {
         final Date expiration = getExpirationDateFromToken(token);
         //到期时间大于当前时间且签发时间大于等于今日0点0分0秒
         final Date  issuedAt  = getIssuedAtDateFromToken(token);
-        return expiration.before(clock.now()) && issuedAt.before(getTodayZero());
+        return expiration.after(clock.now()) && issuedAt.after(getTodayZero());
     }
 
     private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
@@ -130,7 +130,7 @@ public class JwtTokenUtil implements Serializable {
         final Date created = getIssuedAtDateFromToken(token);
 //        final Date expiration = getExpirationDateFromToken(token);
 //        如果token存在，且token创建日期 > 最后修改密码的日期 则代表token有效
-        return (!isTokenExpired(token)
+        return (isTokenExpired(token)
                 && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())
         );
     }

@@ -108,7 +108,14 @@ public class RoleController {
         roleService.updateMenu(resources,roleService.findById(resources.getId()));
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
-
+    @Log("修改角色业务数据权限")
+    @ApiOperation("修改角色业务数据权限")
+    @PutMapping(value = "/dataPermission")
+    @PreAuthorize("@el.check('roles:edit')")
+    public ResponseEntity updateDataPermission(@RequestBody Role resources){
+        roleService.updateDataPermission(resources,roleService.findById(resources.getId()));
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
     @Log("删除角色")
     @ApiOperation("删除角色")
     @DeleteMapping(value = "/{id}")

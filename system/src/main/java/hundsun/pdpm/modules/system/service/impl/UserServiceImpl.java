@@ -13,6 +13,7 @@ import hundsun.pdpm.modules.system.service.UserService;
 import hundsun.pdpm.modules.system.service.dto.RoleSmallDTO;
 import hundsun.pdpm.modules.system.service.dto.UserDTO;
 import hundsun.pdpm.modules.system.service.dto.UserQueryCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -128,6 +129,11 @@ public class UserServiceImpl implements UserService {
         user.setDept(resources.getDept());
         user.setJob(resources.getJob());
         user.setPhone(resources.getPhone());
+        //权限有变化则清空缓存
+        if(!user.getDataPermissions().equals(resources.getDataPermissions())){
+            redisService.deleteAll();
+        }
+        user.setDataPermissions(resources.getDataPermissions());
         userRepository.save(user);
     }
 

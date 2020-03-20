@@ -130,7 +130,7 @@ public class PermissionUtils {
 
     @SuppressWarnings("unchecked")
     public  static <R> Predicate  getPredicate(Root<R> root, Predicate predicate, CriteriaBuilder cb, Class clzz){
-        List<DataPermissionFieldDTO> fieldDTOS = dataPermissionService.getFieldByRoleIdAndTableCode(clzz);
+        List<DataPermissionFieldDTO> fieldDTOS = dataPermissionService.getFieldByTableCode(clzz);
         List<Field> fieldList = QueryHelp.getAllFields(clzz,new ArrayList<>());
         List<Predicate> list = new ArrayList<>();
         list.add(predicate);

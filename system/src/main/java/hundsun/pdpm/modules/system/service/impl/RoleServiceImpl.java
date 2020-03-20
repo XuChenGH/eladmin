@@ -1,6 +1,8 @@
 package hundsun.pdpm.modules.system.service.impl;
 
 import hundsun.pdpm.exception.EntityExistException;
+import hundsun.pdpm.modules.monitor.service.RedisService;
+import hundsun.pdpm.modules.system.domain.User;
 import hundsun.pdpm.modules.system.repository.RoleRepository;
 import hundsun.pdpm.modules.system.service.mapper.RoleMapper;
 import hundsun.pdpm.modules.system.service.mapper.RoleSmallMapper;
@@ -13,6 +15,7 @@ import hundsun.pdpm.modules.system.service.RoleService;
 import hundsun.pdpm.modules.system.service.dto.RoleDTO;
 import hundsun.pdpm.modules.system.service.dto.RoleQueryCriteria;
 import hundsun.pdpm.modules.system.service.dto.RoleSmallDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -41,6 +44,9 @@ public class RoleServiceImpl implements RoleService {
     private final RoleMapper roleMapper;
 
     private final RoleSmallMapper roleSmallMapper;
+
+    @Autowired
+    private RedisService redisService;
 
     public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper, RoleSmallMapper roleSmallMapper) {
         this.roleRepository = roleRepository;
@@ -103,6 +109,7 @@ public class RoleServiceImpl implements RoleService {
         role.setDataScope(resources.getDataScope());
         role.setDepts(resources.getDepts());
         role.setLevel(resources.getLevel());
+        role.setPermission(resources.getPermission());
         roleRepository.save(role);
     }
 
@@ -134,6 +141,14 @@ public class RoleServiceImpl implements RoleService {
         return roleSmallMapper.toDto(new ArrayList<>(roleRepository.findByUsers_Id(id)));
     }
 
+
+    @Override
+    public List<RoleDTO> findByUserId(Long id) {
+        User user = new User();
+        user.setId(id);
+        return roleMapper.toDto(new ArrayList<>(roleRepository.findAllByUsersEqualsAndDataPermissionsIsNotNull(user)));
+    }
+
     @Override
     @Cacheable
     public Integer findByRoles(Set<Role> roles) {
@@ -157,5 +172,16 @@ public class RoleServiceImpl implements RoleService {
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public void updateDataPermission(Role resources, RoleDTO roleDTO) {
+        Role role = roleMapper.toEntity(roleDTO);
+        if(!role.getDataPermissions().equals(resources.getDataPermissions())){
+            redisService.deleteAll();
+        }
+        role.setDataPermissions(resources.getDataPermissions());
+        roleRepository.save(role);
     }
 }

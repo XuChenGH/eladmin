@@ -1,5 +1,6 @@
 package hundsun.pdpm.modules.system.service.dto;
 
+import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,6 +31,8 @@ public class RoleDTO implements Serializable {
     private Set<MenuDTO> menus;
 
     private Set<DeptDTO> depts;
+
+    private Set<DataPermission> dataPermissions;
 
     private Timestamp createTime;
 }

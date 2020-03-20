@@ -1,5 +1,6 @@
 package hundsun.pdpm.modules.system.domain;
 
+import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -58,6 +59,10 @@ public class User implements Serializable {
     @ManyToMany
     @JoinTable(name = "users_roles", joinColumns = {@JoinColumn(name = "user_id",referencedColumnName = "id")}, inverseJoinColumns = {@JoinColumn(name = "role_id",referencedColumnName = "id")})
     private Set<Role> roles;
+
+    @ManyToMany
+    @JoinTable(name = "users_data_permission", joinColumns = {@JoinColumn(name = "user_id",referencedColumnName = "id")}, inverseJoinColumns = {@JoinColumn(name = "data_permission_id",referencedColumnName = "id")})
+    private Set<DataPermission> dataPermissions;
 
     @OneToOne
     @JoinColumn(name = "job_id")

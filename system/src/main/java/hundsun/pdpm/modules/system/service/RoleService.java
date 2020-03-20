@@ -27,6 +27,8 @@ public interface RoleService {
 
     List<RoleSmallDTO> findByUsers_Id(Long id);
 
+    List<RoleDTO> findByUserId(Long id);
+
     Integer findByRoles(Set<Role> roles);
 
     void updateMenu(Role resources, RoleDTO roleDTO);
@@ -40,4 +42,6 @@ public interface RoleService {
     List<RoleDTO> queryAll(RoleQueryCriteria criteria);
 
     void download(List<RoleDTO> queryAll, HttpServletResponse response) throws IOException;
+
+    void updateDataPermission(Role resources, RoleDTO roleDTO);
 }

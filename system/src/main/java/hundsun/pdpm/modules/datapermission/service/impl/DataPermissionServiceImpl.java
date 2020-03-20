@@ -7,12 +7,16 @@ import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import hundsun.pdpm.modules.datapermission.domain.DataPermissionField;
 import hundsun.pdpm.modules.datapermission.service.ClassScaner;
 import hundsun.pdpm.modules.datapermission.service.DataPermissionFieldService;
+import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionCustomDTO;
 import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionFieldDTO;
 import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
 import hundsun.pdpm.modules.monitor.service.RedisService;
 import hundsun.pdpm.modules.system.service.DictDetailService;
 import hundsun.pdpm.modules.system.service.RoleService;
+import hundsun.pdpm.modules.system.service.UserService;
+import hundsun.pdpm.modules.system.service.dto.RoleDTO;
 import hundsun.pdpm.modules.system.service.dto.RoleSmallDTO;
+import hundsun.pdpm.modules.system.service.dto.UserDTO;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.util.CollectionUtils;
 import hundsun.pdpm.utils.ValidationUtil;
@@ -72,6 +76,9 @@ public class DataPermissionServiceImpl implements DataPermissionService {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private UserService userService;
+
     public DataPermissionServiceImpl(DataPermissionRepository dataPermissionRepository, DataPermissionMapper dataPermissionMapper) {
         this.dataPermissionRepository = dataPermissionRepository;
         this.dataPermissionMapper = dataPermissionMapper;
@@ -116,26 +123,32 @@ public class DataPermissionServiceImpl implements DataPermissionService {
         DataPermission dataPermission = new DataPermission();
         dataPermission.setId(resources.getId());
         dataPermission.setName(resources.getName());
-        dataPermission.setRoleId(resources.getRoleId());
-        dataPermission.setTableCode(resources.getTableCode());
-        dataPermission.setTableName(resources.getTableName());
+
         DataPermissionDTO dto = dataPermissionMapper.toDto(dataPermissionRepository.save(dataPermission));
         //存储字段
-        saveField(resources,tableId);
-        //清除缓存
-        redisService.deleteByKey(resources.getTableCode());
+         saveField(resources,tableId);
         return dto;
     }
 
     private  void saveField(DataPermission resources,String tableId){
+        List<String> tableList = new ArrayList<>();
         //存储字段
         if(!CollectionUtils.isEmpty(resources.getFields())){
             resources.getFields().forEach(field->{
                 DataPermission table = new DataPermission();
                 table.setId(tableId);
                 field.setTable(table);
+                if(!tableList.contains(field.getTableCode())){
+                    tableList.add(field.getTableCode());
+                }
                 dataPermissionFieldService.create(field);
             });
+        }
+        //清除缓存
+        if(!CollectionUtils.isEmpty(tableList)){
+            for (String tableName : tableList){
+                redisService.deleteByKey(tableName);
+            }
         }
     }
 
@@ -148,8 +161,6 @@ public class DataPermissionServiceImpl implements DataPermissionService {
            dataPermissionFieldService.deleteByTableId(resources.getId());
            //存储字段
             saveField(resources,resources.getId());
-           //清除缓存
-           redisService.deleteByKey(resources.getTableCode());
     }
 
     @Override
@@ -192,39 +203,23 @@ public class DataPermissionServiceImpl implements DataPermissionService {
 
 
     @Override
-    public List<DataPermissionFieldDTO> getFieldByRoleIdAndTableCode(Class clzz) {
+    public List<DataPermissionFieldDTO> getFieldByTableCode(Class clzz) {
         List<RoleSmallDTO> roles =  roleService.findByUsers_Id(SecurityUtils.getUserId());
         PermissionObject permissionObject = (PermissionObject)clzz.getAnnotation(PermissionObject.class);
         if(permissionObject == null){
             return  new ArrayList<>();
         }
         String tablecode =  permissionObject.tablecode();
-        return  dataPermissionFieldService.findByRoleId(roles,tablecode);
-    }
-
-    @Override
-    public Map<String, Object> permission(Map<String,Object> data, Class clazz) {
-        Object obj = data.get("content");
-        if(obj != null){
-           List<Object> objects = (List<Object>) obj;
-           List<Object> objectList = new ArrayList<>();
-           List<DataPermissionFieldDTO>  fieldDTOS = getFieldByRoleIdAndTableCode(clazz);
-           if(!CollectionUtils.isEmpty(fieldDTOS)){
-               for(Object object :objects){
-                   if(PermissionUtils.isNotLimit(object,fieldDTOS)){
-                       objectList.add(object);
-                   }
-               }
-               data.put("content",objectList);
-           }
-        }
-
-        return data;
+        UserDTO userDTO = userService.findById(SecurityUtils.getUserId());
+        List<UserDTO> userDTOList = new ArrayList<>();
+        userDTOList.add(userDTO);
+        return  dataPermissionFieldService.findByUserRoleAndTableCode(roles,userDTOList,tablecode);
     }
 
 
-    private   DataPermissionDTO getSet(Class clzz){
-        DataPermissionDTO  data  = new DataPermissionDTO();
+
+    private   DataPermissionCustomDTO getSet(Class clzz){
+        DataPermissionCustomDTO  data  = new DataPermissionCustomDTO();
         PermissionObject permissionObject = (PermissionObject)clzz.getAnnotation(PermissionObject.class);
         if (permissionObject != null){
             data.setTableCode(permissionObject.tablecode());
@@ -249,8 +244,8 @@ public class DataPermissionServiceImpl implements DataPermissionService {
     }
 
     @Override
-    public List<DataPermissionDTO> scan(String packageName) {
-        List<DataPermissionDTO> data = new ArrayList<>();
+    public List<DataPermissionCustomDTO> scan(String packageName) {
+        List<DataPermissionCustomDTO> data = new ArrayList<>();
         /*获取所有加这个注解的类*/
         ClassScaner.scan(packageName, PermissionObject.class)
                 .stream().forEach((clazz)->{ data.add(getSet(clazz)); });

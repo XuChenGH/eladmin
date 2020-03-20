@@ -1,6 +1,7 @@
 package hundsun.pdpm.modules.datapermission.service;
 
 import hundsun.pdpm.modules.datapermission.domain.DataPermission;
+import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionCustomDTO;
 import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionDTO;
 import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionFieldDTO;
 import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionQueryCriteria;
@@ -51,9 +52,7 @@ public interface DataPermissionService {
 
     List<DataPermissionDTO> upload(MultipartFile multipartFiles) throws Exception;
 
-    Map<String,Object> permission(Map<String,Object> data, Class clazz);
+    List<DataPermissionFieldDTO> getFieldByTableCode(Class clzz);
 
-    List<DataPermissionFieldDTO> getFieldByRoleIdAndTableCode(Class clzz);
-
-    List<DataPermissionDTO> scan(String packageName);
+    List<DataPermissionCustomDTO> scan(String packageName);
 }
