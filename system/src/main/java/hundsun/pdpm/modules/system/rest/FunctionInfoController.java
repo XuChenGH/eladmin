@@ -3,6 +3,7 @@ package hundsun.pdpm.modules.system.rest;
 import hundsun.pdpm.aop.log.Log;
 import java.util.List;
 import hundsun.pdpm.modules.system.domain.FunctionInfo;
+import hundsun.pdpm.modules.system.domain.FunctionInfoCust;
 import hundsun.pdpm.modules.system.service.FunctionInfoService;
 import hundsun.pdpm.modules.system.service.dto.FunctionInfoDTO;
 import hundsun.pdpm.modules.system.service.dto.FunctionInfoQueryCriteria;
@@ -68,6 +69,15 @@ public class FunctionInfoController {
     public ResponseEntity getFunctionInfosByScriptName(@RequestBody  List<String> data){
         return new ResponseEntity<>(functionInfoService.findByScriptNameList(data),HttpStatus.OK);
     }
+
+    @PostMapping(value = "/funcList")
+    @Log("查询功能信息")
+    @ApiOperation("查询功能信息")
+    @PreAuthorize("@el.check('functionInfo:list','scriptInfo:list')")
+    public ResponseEntity getFunctionInfosByFuncList(@RequestBody FunctionInfoCust functionInfoCust){
+        return new ResponseEntity<>(functionInfoService.findByFunctionListAndProductId(functionInfoCust),HttpStatus.OK);
+    }
+
 
     @GetMapping
     @Log("查询功能信息")

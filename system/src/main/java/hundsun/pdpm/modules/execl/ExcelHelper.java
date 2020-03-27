@@ -713,17 +713,29 @@ public class ExcelHelper {
             if(row.getCell(cellIndex) == null ){
                 value = null;
             } else  {
-                row.getCell(cellIndex).setCellType(CellType.STRING);
-                Cell cell = row.getCell(cellIndex);
-                value = cell.getStringCellValue();
-                if (cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
-                    double cellValue;
-                    cellValue = cell.getNumericCellValue();
-                    // 百分比识别
-                    if (excel!= null && excel.percent()) {
-                        value = String.valueOf(Math.round(cellValue * 100)) + "%";
+                Cell cell;
+                //如果是字典项则不改成文本
+                if(excel != null && StringUtils.isEmpty(excel.dictname()) && !excel.percent()){
+                    row.getCell(cellIndex).setCellType(CellType.STRING);
+                    cell  = row.getCell(cellIndex);
+                    value = cell.getStringCellValue();
+                }else {
+                    cell  = row.getCell(cellIndex);
+                    if (cell.getCellTypeEnum().equals(CellType.NUMERIC)) {
+                        double cellValue;
+                        cellValue = cell.getNumericCellValue();
+                        // 百分比识别
+                        if (excel!= null && excel.percent()) {
+                            value = String.valueOf(Math.round(cellValue * 100)) + "%";
+                        }else {
+                            value = String.valueOf(cellValue);
+                        }
+                    }else {
+                        value = cell.getStringCellValue();
                     }
                 }
+
+
             }
             return getCellValue(excel,value,sheetIndex,dictMap);
         });

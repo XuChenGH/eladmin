@@ -45,7 +45,8 @@ public class PermissionUtils {
         static final String  LESS_EQUAL = "6";
         //大于等于
         static final String  GREATER_EQUAL = "7";
-
+        //存在于
+        static final String  IN = "8";
 
 
         static DataPermissionService dataPermissionService;
@@ -134,6 +135,9 @@ public class PermissionUtils {
         List<Field> fieldList = QueryHelp.getAllFields(clzz,new ArrayList<>());
         List<Predicate> list = new ArrayList<>();
         list.add(predicate);
+//        if(CollectionUtils.isEmpty(fieldDTOS)){
+//            list.add(cb.equal(QueryHelp.getExpression("id",null,root),"*"));
+//        }
         for (Field field:fieldList){
             List<DataPermissionFieldDTO> fieldDTOList = getFieldLimit(field,fieldDTOS);
             boolean accessible = field.isAccessible();

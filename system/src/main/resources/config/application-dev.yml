@@ -34,7 +34,17 @@ spring:
       web-stat-filter:
         url-pattern: /*
         exclusions: "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*"
-
+  cas:
+    sign-out-filters: /logout
+    auth-filters: /*
+    validate-filters: /*
+    request-wrapper-filters: /*
+    assertion-filters: /*
+    cas-server-login-url: https://hs-cas.hundsun.com/cas
+    cas-server-url-prefix: https://hs-cas.hundsun.com/cas
+    redirect-after-validation: true
+    use-session: true
+    server-name: http://localhost:8013
   #配置 Jpa
   jpa:
     properties:
@@ -50,7 +60,7 @@ jwt:
   header: Authorization
   secret: mySecret
   # token 过期时间/毫秒，6小时  1小时 = 3600000 毫秒
-  expiration: 86400000
+  expiration: 28800000
   # 在线用户key
   online: online-token
   # 验证码
@@ -71,3 +81,6 @@ file:
   # 文件大小 /M
   maxSize: 100
   avatarMaxSize: 5
+
+
+

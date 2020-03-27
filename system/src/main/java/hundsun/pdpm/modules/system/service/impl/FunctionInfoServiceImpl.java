@@ -1,9 +1,7 @@
 package hundsun.pdpm.modules.system.service.impl;
 
-import hundsun.pdpm.modules.system.domain.FunctionInfo;
+import hundsun.pdpm.modules.system.domain.*;
 import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
-import hundsun.pdpm.modules.system.domain.FunctionScript;
-import hundsun.pdpm.modules.system.domain.ScriptInfo;
 import hundsun.pdpm.modules.system.repository.FunctionScriptRepository;
 import hundsun.pdpm.modules.system.repository.ScriptInfoRepository;
 import hundsun.pdpm.modules.system.service.DictDetailService;
@@ -26,7 +24,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import hundsun.pdpm.modules.execl.ExcelHelper;
-import hundsun.pdpm.modules.system.domain.DictDetail;
 import org.springframework.web.multipart.MultipartFile;
 import hundsun.pdpm.utils.PageUtil;
 import hundsun.pdpm.utils.QueryHelp;
@@ -164,4 +161,9 @@ public class FunctionInfoServiceImpl implements FunctionInfoService {
        }
         return  data;
      }
+
+    @Override
+    public List<FunctionInfoDTO> findByFunctionListAndProductId(FunctionInfoCust functionInfoCust) {
+        return  functionInfoMapper.toDto(functionInfoRepository.findAllByProductIdEqualsAndFunctionNameIn(functionInfoCust.getProductId(),functionInfoCust.getFunctionNames()),true);
+    }
 }
