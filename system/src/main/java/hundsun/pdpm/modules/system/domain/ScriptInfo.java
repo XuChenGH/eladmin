@@ -3,6 +3,9 @@ package hundsun.pdpm.modules.system.domain;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -20,9 +23,12 @@ public class ScriptInfo implements Serializable {
     @Column(name = "id")
     private String id;
 
-    // 功能标识符
-    @Column(name = "function_id",nullable = false)
-    private String functionId;
+    @Column(name = "product_id",nullable = false)
+    private String productId;
+
+    //
+    @Column(name = "module_type",nullable = false)
+    private String moduleType;
 
     // 脚本类别
     @Column(name = "script_class",nullable = false)

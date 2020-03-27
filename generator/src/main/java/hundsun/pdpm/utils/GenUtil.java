@@ -220,11 +220,11 @@ public class GenUtil {
         }
 
         if ("Dto".equals(templateName)) {
-            return packagePath + "service" + File.separator + "domain" + File.separator + className + "DTO.java";
+            return packagePath + "service" + File.separator + "dto" + File.separator + className + "DTO.java";
         }
 
         if ("QueryCriteria".equals(templateName)) {
-            return packagePath + "service" + File.separator + "domain" + File.separator + className + "QueryCriteria.java";
+            return packagePath + "service" + File.separator + "dto" + File.separator + className + "QueryCriteria.java";
         }
 
         if ("Mapper".equals(templateName)) {

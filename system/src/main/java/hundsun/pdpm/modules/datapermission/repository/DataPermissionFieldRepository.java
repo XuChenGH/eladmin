@@ -2,6 +2,8 @@ package hundsun.pdpm.modules.datapermission.repository;
 
 import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import hundsun.pdpm.modules.datapermission.domain.DataPermissionField;
+import hundsun.pdpm.modules.system.domain.Role;
+import hundsun.pdpm.modules.system.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
@@ -17,4 +19,5 @@ void  deleteAllByIdIn(List<String> idlist);
 List<DataPermissionField> findAllByTableIn(List<DataPermission> idList);
 
 void  deleteAllByTable(DataPermission dataPermission);
+
 }

@@ -40,8 +40,8 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @Log("导出数据")
-    @ApiOperation("导出数据")
+    @Log("导出客户信息数据")
+    @ApiOperation("导出客户信息数据")
     @PostMapping(value = "/download")
     @PreAuthorize("@el.check('customer:export')")
     public void download(HttpServletResponse response,@RequestBody List<Customer> data) throws IOException {
@@ -53,8 +53,8 @@ public class CustomerController {
         }
         customerService.download(customerDTOList, response);
     }
-    @Log("导入数据")
-    @ApiOperation("导入数据")
+    @Log("导入客户信息数据")
+    @ApiOperation("导入客户信息数据")
     @PostMapping(value = "/upload")
     @PreAuthorize("@el.check('customer:import')")
     public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file)throws Exception{

@@ -119,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void download(List<ProductDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(ProductDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,ProductDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,ProductDTO.class,false);
     }
     @Override
     @CacheEvict(allEntries = true)

@@ -1,6 +1,7 @@
 package hundsun.pdpm.modules.system.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,6 +44,8 @@ public class UserDTO implements Serializable {
     private JobSmallDTO job;
 
     private DeptSmallDTO dept;
+
+    private Set<DataPermission> dataPermissions;
 
     private Long deptId;
 

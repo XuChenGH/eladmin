@@ -1,11 +1,11 @@
 package hundsun.pdpm.modules.system.service.impl;
 
 import hundsun.pdpm.modules.datapermission.utils.PermissionUtils;
+import hundsun.pdpm.modules.execl.ExcelUtils;
 import hundsun.pdpm.modules.system.domain.BusinessInfo;
 import hundsun.pdpm.modules.system.service.DictDetailService;
 import org.springframework.util.CollectionUtils;
 import hundsun.pdpm.utils.ValidationUtil;
-import hundsun.pdpm.utils.FileUtil;
 import hundsun.pdpm.modules.system.repository.BusinessInfoRepository;
 import hundsun.pdpm.modules.system.service.BusinessInfoService;
 import hundsun.pdpm.modules.system.service.dto.BusinessInfoDTO;
@@ -14,7 +14,6 @@ import hundsun.pdpm.modules.system.service.mapper.BusinessInfoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import cn.hutool.core.util.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,7 +30,6 @@ import java.util.Map;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 import hundsun.pdpm.utils.*;
 /**
@@ -106,8 +104,7 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
     public void update(BusinessInfo resources) {
         BusinessInfo businessInfo = businessInfoRepository.findById(resources.getId()).orElseGet(BusinessInfo::new);
         ValidationUtil.isNull( businessInfo.getId(),"BusinessInfo","id",resources.getId());
-        businessInfo.copy(resources);
-        businessInfoRepository.save(businessInfo);
+        businessInfoRepository.save(resources);
     }
 
     @Override
@@ -117,16 +114,22 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
         businessInfoRepository.deleteById(id);
     }
 
+    @Override
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(List<String> id) {
+        businessInfoRepository.deleteAllByIdIn(id);
+    }
 
     @Override
     public void download(List<BusinessInfoDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(BusinessInfoDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,BusinessInfoDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,BusinessInfoDTO.class,false);
     }
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public List<BusinessInfoDTO> upload(MultipartFile multipartFiles) throws Exception {
+    public void upload(MultipartFile multipartFiles,String id) throws Exception {
        Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(BusinessInfoDTO.class);
        List<BusinessInfoDTO> data = ExcelHelper.importExcel(multipartFiles,BusinessInfoDTO.class,dictMap,false);
        if(!CollectionUtils.isEmpty(data)){
@@ -141,9 +144,15 @@ public class BusinessInfoServiceImpl implements BusinessInfoService {
              }
              savelist.add(businessInfoMapper.toEntity(businessInfoDTO));
           }
-       businessInfoRepository.deleteAllByIdIn(idlist);
-       businessInfoRepository.saveAll(savelist);
+          businessInfoRepository.deleteAllByIdIn(idlist);
+           int count = savelist.size();
+           int num = 0;
+           ExcelUtils.updateExeclStatus(ExcelUtils.INSERT_IMP,id);
+           for(BusinessInfo businessInfo: savelist){
+               businessInfoRepository.save(businessInfo);
+               num++;
+               ExcelUtils.updateExeclInserNum(count,num,id);
+           }
        }
-        return  data;
      }
 }

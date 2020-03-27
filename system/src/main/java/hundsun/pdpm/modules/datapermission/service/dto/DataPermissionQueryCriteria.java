@@ -14,15 +14,7 @@ public class DataPermissionQueryCriteria{
     @Query
     private String id;
 
-    // 精确
-    @Query
-    private Long roleId;
-
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
-    private String tableCode;
-
-    // 模糊
-    @Query(type = Query.Type.INNER_LIKE)
-    private String tableName;
+    private String name;
 }

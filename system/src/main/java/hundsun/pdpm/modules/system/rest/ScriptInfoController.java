@@ -32,8 +32,8 @@ public class ScriptInfoController {
         this.scriptInfoService = scriptInfoService;
     }
 
-    @Log("导出数据")
-    @ApiOperation("导出数据")
+    @Log("导出脚本信息数据")
+    @ApiOperation("导出脚本信息数据")
     @PostMapping(value = "/download")
     @PreAuthorize("@el.check('scriptInfo:export')")
     public void download(HttpServletResponse response,@RequestBody List<ScriptInfoDTO> data) throws IOException {
@@ -46,8 +46,8 @@ public class ScriptInfoController {
         scriptInfoService.download(scriptInfoDTOList, response);
     }
 
-    @Log("导入数据")
-    @ApiOperation("导入数据")
+    @Log("导入脚本信息数据")
+    @ApiOperation("导入脚本信息数据")
     @PostMapping(value = "/upload")
     @PreAuthorize("@el.check('scriptInfo:import')")
     public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file)throws Exception{
@@ -59,7 +59,22 @@ public class ScriptInfoController {
     @ApiOperation("查询脚本信息")
     @PreAuthorize("@el.check('scriptInfo:list')")
     public ResponseEntity getScriptInfos(ScriptInfoQueryCriteria criteria, Pageable pageable){
-        return new ResponseEntity<>(scriptInfoService.queryAll(criteria,pageable),HttpStatus.OK);
+        return new ResponseEntity<>(scriptInfoService.queryAll(criteria,pageable,true),HttpStatus.OK);
+    }
+    @GetMapping(value = "/nofunc")
+    @Log("查询脚本信息")
+    @ApiOperation("查询脚本信息")
+    @PreAuthorize("@el.check('scriptInfo:list')")
+    public ResponseEntity getScriptInfosNoFunction(ScriptInfoQueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(scriptInfoService.queryAll(criteria,pageable,false),HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/havefunc")
+    @Log("查询脚本信息")
+    @ApiOperation("查询脚本信息")
+    @PreAuthorize("@el.check('scriptInfo:list')")
+    public ResponseEntity getScriptInfosHaveFunction(@RequestBody  List<String> data){
+        return new ResponseEntity<>(scriptInfoService.findScirptByName(data),HttpStatus.OK);
     }
 
     @PostMapping

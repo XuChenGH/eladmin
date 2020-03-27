@@ -162,7 +162,7 @@ public class ${className}ServiceImpl implements ${className}Service {
     @Override
     public void download(List<${className}DTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(${className}DTO.class);
-        ExcelHelper.exportExcel(all,dictMap,${className}DTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,${className}DTO.class,false);
     }
     @Override
     @CacheEvict(allEntries = true)

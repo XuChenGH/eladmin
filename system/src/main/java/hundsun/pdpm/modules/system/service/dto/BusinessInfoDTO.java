@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class BusinessInfoDTO implements Serializable {
 
     // 标识符
-    @Excel(title = "标识符", autosize = true)
+    @Excel(title = "标识符", colwidth = 1)
     private String id;
 
     // 行业

@@ -103,6 +103,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
         customerRepository.deleteById(id);
@@ -112,7 +113,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void download(List<CustomerDTO> all, HttpServletResponse response) throws IOException {
         Map<String, List<DictDetail>> dictMap = dictDetailService.queryAll(CustomerDTO.class);
-        ExcelHelper.exportExcel(all,dictMap,CustomerDTO.class,false);
+        ExcelHelper.exportExcel(response,all,dictMap,CustomerDTO.class,false);
     }
 
     @Override

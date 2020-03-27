@@ -45,7 +45,9 @@ public interface BusinessInfoService {
 
     void delete(String id);
 
+    void delete(List<String> id);
+
     void download(List<BusinessInfoDTO> all, HttpServletResponse response) throws IOException;
 
-    List<BusinessInfoDTO> upload(MultipartFile multipartFiles) throws Exception;
+    void upload(MultipartFile multipartFiles,String id) throws Exception;
 }

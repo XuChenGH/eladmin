@@ -1,6 +1,7 @@
 package hundsun.pdpm.modules.system.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import hundsun.pdpm.modules.datapermission.domain.DataPermission;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -59,6 +60,10 @@ public class Role implements Serializable {
     @JoinTable(name = "roles_depts", joinColumns = {@JoinColumn(name = "role_id",referencedColumnName = "id")}, inverseJoinColumns = {@JoinColumn(name = "dept_id",referencedColumnName = "id")})
     private Set<Dept> depts;
 
+    @ManyToMany
+    @JoinTable(name = "roles_data_permission", joinColumns = {@JoinColumn(name = "role_id",referencedColumnName = "id")}, inverseJoinColumns = {@JoinColumn(name = "data_permission_id",referencedColumnName = "id")})
+    private Set<DataPermission> dataPermissions;
+
     @Column(name = "create_time")
     @CreationTimestamp
     private Timestamp createTime;
@@ -67,8 +72,12 @@ public class Role implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Role role = (Role) o;
         return Objects.equals(id, role.id);
     }

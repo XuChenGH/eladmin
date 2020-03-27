@@ -1,10 +1,12 @@
 package hundsun.pdpm.modules.system.domain;
 
+import hundsun.pdpm.modules.datapermission.domain.DataPermissionField;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 /**
 * @author yantt

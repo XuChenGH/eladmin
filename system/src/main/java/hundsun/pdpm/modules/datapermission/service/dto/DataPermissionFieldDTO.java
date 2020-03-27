@@ -20,6 +20,15 @@ public class DataPermissionFieldDTO implements Serializable {
     @Excel(title = "数据权限标识符")
     private String permissionId;
 
+    // 表代码
+    @Excel(title = "表代码")
+    private String tableCode;
+
+    // 表名称
+    @Excel(title = "表名称")
+    private String tableName;
+
+
     // 字段代码
     @Excel(title = "字段代码")
     private String fieldCode;

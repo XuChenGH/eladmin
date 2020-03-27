@@ -1,6 +1,6 @@
 server:
   port: 8000
-
+  connection-timeout: 3000000
 spring:
   freemarker:
     check-template-location: false
@@ -27,7 +27,7 @@ spring:
     port: 6379
     password:
     #连接超时时间
-    timeout: 5000
+    timeout: 5000000
 
 task:
   pool:

@@ -3,7 +3,9 @@ package hundsun.pdpm.modules.datapermission.service;
 import hundsun.pdpm.modules.datapermission.domain.DataPermissionField;
 import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionFieldDTO;
 import hundsun.pdpm.modules.datapermission.service.dto.DataPermissionFieldQueryCriteria;
+import hundsun.pdpm.modules.system.service.dto.RoleDTO;
 import hundsun.pdpm.modules.system.service.dto.RoleSmallDTO;
+import hundsun.pdpm.modules.system.service.dto.UserDTO;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -42,7 +44,7 @@ public interface DataPermissionFieldService {
 
     List<DataPermissionFieldDTO> findByIdlist(List<DataPermissionFieldDTO> dataPermissionFieldList);
 
-    List<DataPermissionFieldDTO> findByRoleId(List<RoleSmallDTO> roleId,String tablecode);
+    List<DataPermissionFieldDTO> findByUserRoleAndTableCode(List<RoleSmallDTO> roles, List<UserDTO> user,String tableCode);
 
     DataPermissionFieldDTO create(DataPermissionField resources);
 

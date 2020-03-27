@@ -12,4 +12,10 @@ public interface FunctionInfoRepository extends JpaRepository<FunctionInfo, Stri
 List<FunctionInfo> findAllByIdIn(List<String> idlist);
 
 void  deleteAllByIdIn(List<String> idlist);
+
+List<FunctionInfo> findAllByFunctionNameEquals(String sfunctionName);
+
+List<FunctionInfo> findAllByProductIdEqualsAndFunctionNameIn(String sProductId,List<String> functionNameList);
+
+List<FunctionInfo> findAllByFunctionNameEqualsAndFunctionModeEqualsAndProductIdEquals(String sfunctionName,String sFunctionMode,String sProductId);
 }

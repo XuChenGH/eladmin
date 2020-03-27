@@ -74,37 +74,41 @@ public class QueryHelp {
                             }
                         }
                     }
+                    Expression expression =  getExpression(attributeName,join,root);
+                    if(!StringUtils.isEmpty(q.nvl())){
+                        expression = cb.coalesce(cb.nullif(expression,""),q.nvl());
+                    }
                     switch (q.type()) {
                         case EQUAL:
-                            list.add(cb.equal(getExpression(attributeName,join,root)
+                            list.add(cb.equal(expression
                                     .as((Class<? extends Comparable>) fieldType),val));
                             break;
                         case GREATER_THAN:
-                            list.add(cb.greaterThanOrEqualTo(getExpression(attributeName,join,root)
+                            list.add(cb.greaterThanOrEqualTo(expression
                                     .as((Class<? extends Comparable>) fieldType), (Comparable) val));
                             break;
                         case LESS_THAN:
-                            list.add(cb.lessThanOrEqualTo(getExpression(attributeName,join,root)
+                            list.add(cb.lessThanOrEqualTo(expression
                                     .as((Class<? extends Comparable>) fieldType), (Comparable) val));
                             break;
                         case LESS_THAN_NQ:
-                            list.add(cb.lessThan(getExpression(attributeName,join,root)
+                            list.add(cb.lessThan(expression
                                     .as((Class<? extends Comparable>) fieldType), (Comparable) val));
                             break;
                         case INNER_LIKE:
-                            list.add(cb.like(getExpression(attributeName,join,root)
+                            list.add(cb.like(expression
                                     .as(String.class), "%" + val.toString() + "%"));
                             break;
                         case LEFT_LIKE:
-                            list.add(cb.like(getExpression(attributeName,join,root)
+                            list.add(cb.like(expression
                                     .as(String.class), "%" + val.toString()));
                             break;
                         case RIGHT_LIKE:
-                            list.add(cb.like(getExpression(attributeName,join,root)
+                            list.add(cb.like(expression
                                     .as(String.class), val.toString() + "%"));
                         case IN:
                             if (CollUtil.isNotEmpty((Collection<Long>)val)) {
-                                list.add(getExpression(attributeName,join,root).in((Collection<Long>) val));
+                                list.add(expression.in((Collection<Long>) val));
                             }
                             break;
                         default: break;

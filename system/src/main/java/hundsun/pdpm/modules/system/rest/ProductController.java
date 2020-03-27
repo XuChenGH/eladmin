@@ -33,8 +33,8 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @Log("导出数据")
-    @ApiOperation("导出数据")
+    @Log("导出产品信息数据")
+    @ApiOperation("导出产品信息数据")
     @PostMapping(value = "/download")
     @PreAuthorize("@el.check('product:export')")
     public void download(HttpServletResponse response,@RequestBody List<ProductDTO> data) throws IOException {
@@ -47,14 +47,14 @@ public class ProductController {
         productService.download(productDTOList, response);
     }
 
-    @Log("导入数据")
-    @ApiOperation("导入数据")
+    @Log("导入产品信息数据")
+    @ApiOperation("导入产品信息数据")
     @PostMapping(value = "/upload")
     @PreAuthorize("@el.check('product:import')")
     public  ResponseEntity upload(HttpServletResponse response,@RequestParam("file") MultipartFile file)throws Exception{
        return new ResponseEntity<>(productService.upload(file),HttpStatus.CREATED);
     }
-    @ApiOperation("返回全部的用户")
+    @ApiOperation("返回全部的产品")
     @GetMapping(value = "/all")
     @PreAuthorize("@el.check('custUser:list','custProduct:add')")
     public ResponseEntity getAll(ProductQueryCriteria criteria){

@@ -70,8 +70,8 @@ public class VisitsServiceImpl implements VisitsService {
             recentVisits += data.getPvCounts();
             recentIp += data.getIpCounts();
         }
-        map.put("newVisits",visits.getPvCounts());
-        map.put("newIp",visits.getIpCounts());
+        map.put("newVisits",visits==null?0:visits.getPvCounts());
+        map.put("newIp",visits==null?0:visits.getIpCounts());
         map.put("recentVisits",recentVisits);
         map.put("recentIp",recentIp);
         return map;

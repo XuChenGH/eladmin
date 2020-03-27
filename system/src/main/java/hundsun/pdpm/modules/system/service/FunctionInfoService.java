@@ -1,6 +1,7 @@
 package hundsun.pdpm.modules.system.service;
 
 import hundsun.pdpm.modules.system.domain.FunctionInfo;
+import hundsun.pdpm.modules.system.domain.FunctionInfoCust;
 import hundsun.pdpm.modules.system.service.dto.FunctionInfoDTO;
 import hundsun.pdpm.modules.system.service.dto.FunctionInfoQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,9 @@ public interface FunctionInfoService {
     */
     List<FunctionInfoDTO> queryAll(FunctionInfoQueryCriteria criteria);
 
+
+    Map<String,FunctionInfoDTO> queryAll();
+
     /**
      * 根据ID查询
      * @param id ID
@@ -38,6 +42,8 @@ public interface FunctionInfoService {
     FunctionInfoDTO findById(String id);
 
     List<FunctionInfoDTO> findByIdlist(List<FunctionInfoDTO> functionInfoList);
+
+    List<FunctionInfoDTO> findByScriptNameList(List<String> data);
 
     FunctionInfoDTO create(FunctionInfo resources);
 
@@ -48,4 +54,6 @@ public interface FunctionInfoService {
     void download(List<FunctionInfoDTO> all, HttpServletResponse response) throws IOException;
 
     List<FunctionInfoDTO> upload(MultipartFile multipartFiles) throws Exception;
+
+    List<FunctionInfoDTO> findByFunctionListAndProductId(FunctionInfoCust functionInfoCust);
 }
